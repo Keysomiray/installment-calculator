@@ -6,117 +6,271 @@
 <title>Калькулятор рассрочки</title>
 
 <style>
-:root{
-  --green:#0f7a44;
-  --green-dark:#0b5f35;
-  --white:#fff;
-  --glass:rgba(255,255,255,.12);
+:root {
+  --green-1: #0a5a33;
+  --green-2: #0c6b3c;
+  --green-3: #0e7843;
+  --white: #ffffff;
+  --glass: rgba(255,255,255,0.12);
 }
 
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:linear-gradient(180deg,var(--green),var(--green-dark));
-  color:var(--white);
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(180deg, var(--green-3), var(--green-1));
+  color: var(--white);
 }
 
-.container{
-  max-width:520px;
-  margin:0 auto;
-  padding:16px;
+.page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
 }
 
-.header{
-  text-align:center;
-  margin-bottom:24px;
+.container {
+  width: 100%;
+  max-width: 520px;
+  padding: 16px;
 }
 
-.header img{
-  width:180px;
+.card {
+  padding: 18px;
 }
 
-label{
-  display:block;
-  margin-top:16px;
-  font-size:14px;
+.header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 22px;
 }
 
-input[type=number],
-input[type=text]{
-  width:100%;
-  padding:14px;
-  margin-top:6px;
-  border-radius:14px;
-  border:2px solid rgba(255,255,255,.35);
-  background:transparent;
-  color:#fff;
-  font-size:16px;
+.header img {
+  width: 44px;
+  height: 44px;
 }
 
-input[type=range]{
-  width:100%;
-  margin-top:10px;
+.header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
 }
 
-.category{
-  display:flex;
-  gap:10px;
-  margin-top:8px;
+label {
+  display: block;
+  margin-top: 16px;
+  font-size: 14px;
+  opacity: 0.9;
 }
 
-.cat{
-  flex:1;
-  padding:12px;
-  border-radius:14px;
-  border:2px solid rgba(255,255,255,.35);
-  text-align:center;
-  cursor:pointer;
+input, select {
+  width: 100%;
+  padding: 12px 14px;
+  margin-top: 6px;
+  border-radius: 14px;
+  border: 2px solid rgba(255,255,255,0.35);
+  background: transparent;
+  color: var(--white);
+  font-size: 16px;
 }
 
-.cat.active{
-  background:rgba(255,255,255,.18);
-  border-color:#fff;
+input[type=range] {
+  padding: 0;
 }
 
-.value{
-  margin-top:6px;
-  font-size:13px;
-  opacity:.85;
+select option {
+  color: #000;
 }
 
-.result{
-  margin-top:20px;
-  background:var(--glass);
-  padding:16px;
-  border-radius:18px;
+.range-label {
+  font-size: 13px;
+  margin-top: 6px;
+  opacity: 0.85;
 }
 
-.result div{
-  margin-bottom:8px;
-  font-size:15px;
+/* ===== CATEGORY BUTTONS ===== */
+.category-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.cat-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 14px;
+  border: 2px solid rgba(255,255,255,0.35);
+  background: transparent;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.cat-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+.cat-btn.active {
+  background: rgba(255,255,255,0.18);
+  border-color: #fff;
+}
+
+/* ===== RESULT ===== */
+.result {
+  margin-top: 20px;
+  background: var(--glass);
+  padding: 16px;
+  border-radius: 18px;
+}
+
+.result div {
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.button {
+  margin-top: 22px;
+  width: 100%;
+  padding: 15px;
+  border-radius: 18px;
+  border: 2px solid #fff;
+  background: transparent;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
 }
 </style>
 </head>
 
 <body>
-<div class="container">
+<div class="page">
+  <div class="container">
+    <div class="card">
 
-<div class="header">
-  <img src="logo.png">
+      <div class="header">
+        <img src="logo.png">
+        <h2>Товары в рассрочку</h2>
+      </div>
+
+      <label>Стоимость товара (₽)</label>
+      <input type="number" id="price" value="40000" min="25000" max="80000">
+
+      <label>Категория товара</label>
+      <div class="category-buttons">
+        <div class="cat-btn active" data-cat="1">
+          <img src="icon-phone.png"> Телефоны
+        </div>
+        <div class="cat-btn" data-cat="2">
+          <img src="icon-box.png"> Все товары
+        </div>
+      </div>
+
+      <label>Срок рассрочки</label>
+      <select id="term">
+        <option value="4">4 месяца</option>
+        <option value="5">5 месяцев</option>
+        <option value="6" selected>6 месяцев</option>
+        <option value="7">7 месяцев</option>
+        <option value="8">8 месяцев</option>
+        <option value="9">9 месяцев</option>
+        <option value="10">10 месяцев</option>
+        <option value="11">11 месяцев</option>
+        <option value="12">12 месяцев</option>
+      </select>
+
+      <label>Первоначальный взнос (%)</label>
+      <input type="range" id="downPercent" min="0" max="50" value="0">
+      <div class="range-label" id="downLabel">0%</div>
+
+      <div class="result">
+        <div id="downPay"></div>
+        <div id="markup"></div>
+        <div id="monthly"></div>
+        <div id="total"></div>
+      </div>
+
+      <button class="button">Оформить заявку</button>
+
+    </div>
+  </div>
 </div>
 
-<label>Стоимость товара</label>
-<input type="number" id="price" value="40000" min="25000" max="80000">
+<script>
+// ===== ПРОЦЕНТЫ =====
+const phonePricePercent={4:.1667,5:.2083,6:.25,7:.2917,8:.3333,9:.375,10:.4167,11:.4583,12:.5};
+const phoneRestPercent={4:.234,5:.2747,6:.3158,7:.357,8:.4,9:.4426,10:.4855,11:.5285,12:.5714};
+const allPricePercent={4:.1333,5:.1667,6:.2,7:.2333,8:.2583,9:.2917,10:.3167,11:.33,12:.35};
+const allRestPercent={4:.186,5:.2353,6:.2857,7:.3373,8:.3769,9:.4308,10:.472,11:.4944,12:.5283};
 
-<label>Категория товара</label>
-<div class="category">
-  <div class="cat active" data-cat="1">Телефоны</div>
-  <div class="cat" data-cat="2">Все товары</div>
-</div>
+let category = 1;
 
-<label>Количество платежей</label>
-<input type="range" id="term" min="4" max="12" value="6">
-<div class="value" id="termLabel">6 платежей</div>
+function formatMoney(n) {
+  return Math.round(n).toLocaleString('ru-RU') + ' ₽';
+}
 
-<label>Первоначальный взнос (₽)</label>
-<input type="number" id="down" valu
+function round100(v) {
+  return Math.ceil(v / 100) * 100;
+}
+
+function calculate() {
+  const price = Number(priceInput.value) + 1000;
+  const term = Number(termSelect.value);
+  const downPercent = Number(downInput.value);
+
+  const down = price * downPercent / 100;
+  const priceP = category === 1 ? phonePricePercent : allPricePercent;
+  const restP  = category === 1 ? phoneRestPercent  : allRestPercent;
+
+  const minDown = (price * priceP[term]) / term;
+  const rest = price - down;
+
+  const markup = down >= minDown && down > 0
+    ? price * priceP[term]
+    : rest * restP[term];
+
+  const total = price + markup;
+  const monthly = (total - down) / term;
+
+  downPay.innerHTML = `Первоначальный взнос: <b>${formatMoney(round100(down))}</b>`;
+  markupDiv.innerHTML = `Наценка: <b>${formatMoney(round100(markup))}</b>`;
+  monthlyDiv.innerHTML = `Ежемесячный платёж: <b>${formatMoney(round100(monthly))}</b>`;
+  totalDiv.innerHTML = `Общая сумма: <b>${formatMoney(round100(total))}</b>`;
+}
+
+// DOM
+const priceInput = document.getElementById('price');
+const termSelect = document.getElementById('term');
+const downInput = document.getElementById('downPercent');
+const downLabel = document.getElementById('downLabel');
+
+const downPay = document.getElementById('downPay');
+const markupDiv = document.getElementById('markup');
+const monthlyDiv = document.getElementById('monthly');
+const totalDiv = document.getElementById('total');
+
+document.querySelectorAll('.cat-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    category = Number(btn.dataset.cat);
+    calculate();
+  });
+});
+
+document.querySelectorAll('input, select').forEach(el =>
+  el.addEventListener('input', calculate)
+);
+
+downInput.addEventListener('input', e =>
+  downLabel.innerText = e.target.value + '%'
+);
+
+calculate();
+</script>
+</body>
+</html>
