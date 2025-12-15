@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAMBO — Калькулятор рассрочки</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --green: #0f7a44;
+            --green-dark: #0b5f35;
+            --red: #cc1313;
+            --track: rgba(255, 255, 255, .35);
+            --glass: rgba(255, 255, 255, .12);
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(180deg, var(--green), var(--green-dark));
+            color: #fff;
+        }
+
+        .container {
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 16px
+        }
+
+        .content {
+            max-width: 480px;
+            margin: 0 auto
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px
+        }
+
+        .header img {
+            width: 180px
+        }
+
+        .card,
+        .result {
+            background: var(--glass);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+
+
+        label {
+            display: block;
+            margin-top: 14px;
+            font-size: 14px;
+            font-weight: 500
+        }
+
+        input[type=text] {
+            width: 100%;
+            padding: 14px;
+            margin-top: 6px;
+            border-radius: 14px;
+            border: 2px solid rgba(255, 255, 255, .35);
+            background: transparent;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        /* CATEGORY */
+        .category {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px
+        }
+
+        .cat {
+            flex: 1;
+            padding: 12px;
+            border-radius: 14px;
+            border: 2px solid rgba(255, 255, 255, .35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: .25s;
+        }
+
+        .cat img {
+            width: 36px;
+            height: 36px
+        }
+
+        .cat:hover {
+            background: rgba(255, 255, 255, .12);
+            transform: translateY(-1px)
+        }
+
+        .cat:active {
+            transform: scale(.97)
+        }
+
+        .cat.active {
+            background: rgba(255, 255, 255, .22);
+            border-color: #fff;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, .18);
+        }
+
+        /* RANGE */
+        .range-wrap {
+            position: relative;
+            --thumb-x: 0px
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 3px;
+            margin-top: 1px;
+            border-radius: 4px;
+            outline: none;
+            background: linear-gradient(to right, var(--red) 0%, var(--red) 0%, var(--track) 0%, var(--track) 100%);
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--red);
+            cursor: pointer;
+            position: relative;
+            z-index: 3;
+        }
+
+        /* RIPPLE */
+        .range-ripple {
+            position: absolute;
+            top: calc(50% + 4px);
+            left: var(--thumb-x);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 5px solid rgba(201, 7, 7, 0.9521);
+            transform: translate(-50%, -50%) scale(.85);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform .55s ease, opacity .55s ease;
+        }
+
+        .range-ripple.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .value {
+            margin-top: 6px;
+            font-size: 13px;
+            opacity: .85
+        }
+
+        .min-down {
+            margin-top: 6px;
+            font-size: 12px;
+            opacity: .8;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            user-select: none;
+            transition: background .2s ease, transform .12s ease;
+        }
+
+        .min-down:hover {
+            background: rgba(255, 255, 255, .12)
+        }
+
+        .min-down:active {
+            transform: scale(.96)
+        }
+
+        .result div {
+            margin-bottom: 8px;
+            font-size: 15px;
+            font-weight: 500
+        }
+
+        .wa-btn {
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px;
+            border-radius: 16px;
+
+            background: rgba(37, 211, 102, .18);
+            border: 2px solid rgba(255, 255, 255, .35);
+
+            color: #fff;
+            /* 👈 БЕЛЫЙ ТЕКСТ */
+            font-family: 'Montserrat', Arial, sans-serif;
+            /* 👈 ТОЧНО Montserrat */
+            font-weight: 500;
+            font-size: 15px;
+            text-decoration: none;
+
+            transition:
+                background .25s ease,
+                transform .12s ease;
+        }
+
+        .wa-btn:hover {
+            background: rgba(37, 211, 102, .28);
+        }
+
+        .wa-btn:active {
+            transform: scale(.96);
+        }
+
+        .wa-btn img {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header"><img src="logo.png"></div>
+
+        <div class="content">
+            <div class="card">
+
+                <label>Стоимость товара:</label>
+                <input type="text" id="price">
+
+                <label></label>
+                <div class="category">
+                    <div class="cat active" data-cat="1"><img src="icon-phone.png">Телефоны</div>
+                    <div class="cat" data-cat="2"><img src="icon-box.png">Другие товары</div>
+                </div>
+
+                <label>Количество платежей:</label>
+                <div class="range-wrap" id="rangeWrap">
+                    <input type="range" id="term" min="4" max="12" value="6">
+                    <div class="range-ripple" id="rangeRipple"></div>
+                </div>
+                <div class="value" id="termLabel"></div>
+
+                <label>Первоначальный взнос:</label>
+                <input type="text" id="down">
+                <div class="min-down" id="minDown"></div>
+
+            </div>
+
+            <div class="result">
+                <div id="monthly"></div>
+                <div id="total"></div>
+            </div>
+            <a href="https://wa.me/79298533232" target="_blank" class="wa-btn" id="waBtn">
+                <img src="whatsapp-icon.png" alt="WhatsApp">
+                Написать нам
+            </a>
+
+        </div>
+    </div>
+
+    <script>
+        /* UX */
+        const clickSound = new Audio('click.mp3');
+        clickSound.volume = 0.25;
+        function feedback() {
+            if (navigator.vibrate) navigator.vibrate(12);
+            try { clickSound.currentTime = 0; clickSound.play() } catch (e) { }
+        }
+
+        /* TABLES */
+        const phonePrice = { 4: .1667, 5: .2083, 6: .25, 7: .2917, 8: .3333, 9: .375, 10: .4167, 11: .4583, 12: .5 };
+        const phoneRest = { 4: .234, 5: .2747, 6: .3158, 7: .357, 8: .4, 9: .4426, 10: .4855, 11: .5285, 12: .5714 };
+        const allPrice = { 4: .1333, 5: .1667, 6: .2, 7: .2333, 8: .2583, 9: .2917, 10: .3167, 11: .33, 12: .35 };
+        const allRest = { 4: .186, 5: .2353, 6: .2857, 7: .3373, 8: .3769, 9: .4308, 10: .472, 11: .4944, 12: .5283 };
+
+        let category = 1, lastTerm = 6, userTouchedDown = false;
+
+        /* helpers */
+        const digits = v => v.replace(/\D/g, '');
+        const bank = v => (Math.ceil(v / 100) * 100).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
+
+        /* DOM */
+        const priceInput = document.getElementById('price');
+        const downInput = document.getElementById('down');
+        const termInput = document.getElementById('term');
+        const rangeWrap = document.getElementById('rangeWrap');
+        const ripple = document.getElementById('rangeRipple');
+        const termLabel = document.getElementById('termLabel');
+        const monthlyDiv = document.getElementById('monthly');
+        const totalDiv = document.getElementById('total');
+        const minDownDiv = document.getElementById('minDown');
+
+        /* money input */
+        function bindMoneyInput(el, isDown = false) {
+            let original = '', editing = false;
+            el.addEventListener('focus', () => { original = el.value; editing = false; el.value = '' });
+            el.addEventListener('keydown', e => {
+                if (e.key === 'Escape') { el.value = original; el.blur() }
+                if (e.key === 'Enter') el.blur();
+            });
+            el.addEventListener('input', () => {
+                editing = true; el.value = digits(el.value);
+                if (isDown) userTouchedDown = true;
+            });
+            el.addEventListener('blur', () => {
+                if (!editing) { el.value = original; return }
+                el.value = bank(Number(el.value) || 0); calc();
+            });
+        }
+        bindMoneyInput(priceInput);
+        bindMoneyInput(downInput, true);
+
+        /* CALC */
+        function calc() {
+            const price = Number(digits(priceInput.value));
+            const downRaw = Number(digits(downInput.value));
+            const term = lastTerm, N = term - 1;
+            let down = downRaw;
+
+            const p = category === 1 ? phonePrice : allPrice;
+            const r = category === 1 ? phoneRest : allRest;
+
+            let minDown;
+            if (category === 1) {
+                minDown = Math.ceil(((price + 1000) * (p[term] + 1) / term) / 100) * 100;
+            } else {
+                minDown = Math.ceil((price * 0.3) / 100) * 100;
+            }
+
+            minDownDiv.innerText = 'Минимальный взнос: ' + bank(minDown);
+
+            if (!userTouchedDown) {
+                down = minDown;
+                downInput.value = bank(minDown);
+            }
+
+            let totalCost;
+            if (down === minDown) {
+                totalCost = (price + 1000) * (p[term] + 1);
+            } else {
+                totalCost = (price + 1000 - down) * (r[term] + 1) + down;
+            }
+
+            const monthly = Math.ceil(((totalCost - down) / N) / 100) * 100;
+            const total = monthly * N + down;
+
+            termLabel.innerText = term + ' платежей';
+            const markupValue = total - price;
+
+            monthlyDiv.innerHTML =
+                'Ежемесячный платёж: <b>' + bank(monthly) + '</b><br>' +
+                'Наценка: <b>' + bank(markupValue) + '</b>';
+
+            totalDiv.innerHTML =
+                'Общая сумма: <b>' + bank(total) + '</b>';
+
+        }
+
+        /* click min down */
+        minDownDiv.addEventListener('click', () => {
+            feedback();
+            const v = digits(minDownDiv.innerText);
+            if (!v) return;
+            userTouchedDown = true;
+            downInput.value = bank(Number(v));
+            downInput.focus(); downInput.blur();
+            calc();
+        });
+
+        /* SLIDER SYNC — 100% СИНХРОН */
+        function updateSlider() {
+            const min = +termInput.min;
+            const max = +termInput.max;
+            const val = +termInput.value;
+            const percent = (val - min) / (max - min);
+
+            termInput.style.background =
+                `linear-gradient(to right,var(--red) 0%,var(--red) ${percent * 100}%,var(--track) ${percent * 100}%,var(--track) 100%)`;
+
+            const thumbSize = 18;
+            const track = termInput.clientWidth - thumbSize;
+            const x = percent * track + thumbSize / 2 + 2;
+
+            rangeWrap.style.setProperty('--thumb-x', x + 'px');
+        }
+
+
+        termInput.addEventListener('input', () => {
+            lastTerm = +termInput.value;
+            updateSlider();
+            calc();
+        });
+        termInput.addEventListener('pointerdown', () => { ripple.classList.add('active'); updateSlider() });
+        document.addEventListener('pointerup', () => ripple.classList.remove('active'));
+
+        /* category */
+        document.querySelectorAll('.cat').forEach(c => {
+            c.onclick = () => {
+                feedback();
+                document.querySelectorAll('.cat').forEach(x => x.classList.remove('active'));
+                c.classList.add('active');
+                category = +c.dataset.cat;
+                userTouchedDown = false;
+                calc();
+            };
+        });
+
+        /* init */
+        priceInput.value = bank(40000);
+        updateSlider();
+        calc();
+        const waBtn = document.getElementById('waBtn');
+        if (waBtn) {
+            waBtn.addEventListener('click', feedback);
+        }
+
+    </script>
+
+</body>
+
+</html>
