@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Калькулятор рассрочки</title>
+    <title>HAMBO — Калькулятор рассрочки</title>
 
     <!-- Montserrat -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,6 +20,10 @@
             --glass: rgba(255, 255, 255, .12);
         }
 
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             font-family: 'Montserrat', Arial, sans-serif;
@@ -33,18 +37,36 @@
             padding: 16px;
         }
 
+        /* единая колонка */
+        .content {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        /* header */
         .header {
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
         .header img {
             width: 180px;
         }
 
+        /* ОДИНАКОВЫЕ БЛОКИ */
+        .card,
+        .result {
+            width: 100%;
+            padding: 18px 18px 20px;
+            border-radius: 20px;
+            margin-bottom: 16px;
+            background: var(--glass);
+        }
+
+        /* form */
         label {
             display: block;
-            margin-top: 16px;
+            margin-top: 14px;
             font-size: 14px;
             font-weight: 500;
         }
@@ -60,7 +82,7 @@
             font-size: 16px;
         }
 
-        /* ===== CATEGORY ===== */
+        /* category */
         .category {
             display: flex;
             gap: 10px;
@@ -72,11 +94,11 @@
             padding: 12px;
             border-radius: 14px;
             border: 2px solid rgba(255, 255, 255, .35);
-            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
+            cursor: pointer;
             font-weight: 500;
         }
 
@@ -90,7 +112,7 @@
             border-color: #fff;
         }
 
-        /* ===== RANGE ===== */
+        /* range */
         input[type=range] {
             -webkit-appearance: none;
             width: 100%;
@@ -121,18 +143,15 @@
             opacity: .85;
         }
 
-        /* ===== RESULT ===== */
-        .result {
-            margin-top: 20px;
-            background: var(--glass);
-            padding: 16px;
-            border-radius: 18px;
-        }
-
+        /* result text */
         .result div {
             margin-bottom: 8px;
             font-size: 15px;
             font-weight: 500;
+        }
+
+        .result div:last-child {
+            margin-bottom: 0;
         }
     </style>
 </head>
@@ -141,61 +160,63 @@
     <div class="container">
 
         <div class="header">
-            <img src="logo.png" alt="Логотип">
+            <img src="logo.png" alt="HAMBO">
         </div>
 
-        <label>Стоимость товара</label>
-        <input type="text" id="price" value="40 000 ₽">
+        <div class="content">
 
-        <label>Категория товара</label>
-        <div class="category">
-            <div class="cat active" data-cat="1">
-                <img src="icon-phone.png"> Телефоны
+            <div class="card">
+
+                <label>Стоимость товара</label>
+                <input type="text" id="price" value="40 000 ₽">
+
+                <label>Категория товара</label>
+                <div class="category">
+                    <div class="cat active" data-cat="1">
+                        <img src="icon-phone.svg"> Телефоны
+                    </div>
+                    <div class="cat" data-cat="2">
+                        <img src="icon-box.svg"> Все товары
+                    </div>
+                </div>
+
+                <label>Количество платежей</label>
+                <input type="range" id="term" min="4" max="12" value="12">
+                <div class="value" id="termLabel">12 платежей</div>
+
+                <label>Первоначальный взнос</label>
+                <input type="text" id="down" value="0 ₽">
+
             </div>
-            <div class="cat" data-cat="2">
-                <img src="icon-box.png"> Все товары
+
+            <div class="result">
+                <div id="monthly"></div>
+                <div id="total"></div>
             </div>
+
         </div>
-
-        <label>Количество платежей</label>
-        <input type="range" id="term" min="4" max="12" value="6">
-        <div class="value" id="termLabel">6 платежей</div>
-
-        <label>Первоначальный взнос</label>
-        <input type="text" id="down" value="0 ₽">
-
-        <div class="result">
-            <div id="monthly"></div>
-            <div id="total"></div>
-        </div>
-
     </div>
 
     <script>
-        // ===== ПРОЦЕНТЫ =====
+        // таблицы
         const phonePrice = { 4: .1667, 5: .2083, 6: .25, 7: .2917, 8: .3333, 9: .375, 10: .4167, 11: .4583, 12: .5 };
         const phoneRest = { 4: .234, 5: .2747, 6: .3158, 7: .357, 8: .4, 9: .4426, 10: .4855, 11: .5285, 12: .5714 };
         const allPrice = { 4: .1333, 5: .1667, 6: .2, 7: .2333, 8: .2583, 9: .2917, 10: .3167, 11: .33, 12: .35 };
         const allRest = { 4: .186, 5: .2353, 6: .2857, 7: .3373, 8: .3769, 9: .4308, 10: .472, 11: .4944, 12: .5283 };
 
         let category = 1;
-        let lastTerm = 6;
+        let lastTerm = 12;
 
-        // ===== HELPERS =====
+        // helpers
         function digits(v) { return v.replace(/\D/g, ''); }
         function bank(v) {
-            const rounded = Math.ceil(v / 100) * 100;
-            return rounded
-                .toString()
-                .replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
-                + ' ₽';
+            const r = Math.ceil(v / 100) * 100;
+            return r.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
         }
 
-
-        // ===== MONEY INPUT =====
+        // input UX
         function bindMoneyInput(el) {
-            let original = '';
-            let editing = false;
+            let original = '', editing = false;
 
             el.addEventListener('focus', () => {
                 original = el.value;
@@ -231,7 +252,7 @@
             });
         }
 
-        // ===== CALC =====
+        // calc
         function calc() {
             const price = Number(digits(priceInput.value)) + 1000;
             const down = Number(digits(downInput.value));
@@ -247,15 +268,11 @@
             const total = price + markup;
             const monthly = (total - down) / term;
 
-            monthlyDiv.innerHTML =
-                'Ежемесячный платёж: <b>' + bank(monthly) + '</b>';
-
-            totalDiv.innerHTML =
-                'Общая сумма: <b>' + bank(total) + '</b>';
-
+            monthlyDiv.innerHTML = 'Ежемесячный платёж: <b>' + bank(monthly) + '</b>';
+            totalDiv.innerHTML = 'Общая сумма: <b>' + bank(total) + '</b>';
         }
 
-        // ===== DOM =====
+        // dom
         const priceInput = document.getElementById('price');
         const downInput = document.getElementById('down');
         const termInput = document.getElementById('term');
@@ -266,7 +283,7 @@
         bindMoneyInput(priceInput);
         bindMoneyInput(downInput);
 
-        // категории
+        // category
         document.querySelectorAll('.cat').forEach(c => {
             c.onclick = () => {
                 document.querySelectorAll('.cat').forEach(x => x.classList.remove('active'));
@@ -276,19 +293,17 @@
             };
         });
 
-        // LIVE ползунок
+        // range
         function updateFill() {
-            const percent = (termInput.value - termInput.min) / (termInput.max - termInput.min) * 100;
-            termInput.style.setProperty('--fill', percent + '%');
+            const p = (termInput.value - termInput.min) / (termInput.max - termInput.min) * 100;
+            termInput.style.setProperty('--fill', p + '%');
             termLabel.innerText = Math.round(termInput.value) + ' платежей';
         }
 
         termInput.addEventListener('input', updateFill);
-
         termInput.addEventListener('change', () => {
             lastTerm = Math.round(termInput.value);
             termInput.value = lastTerm;
-            termLabel.innerText = lastTerm + ' платежей';
             updateFill();
             calc();
         });
