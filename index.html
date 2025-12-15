@@ -1,240 +1,234 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Калькулятор рассрочки</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор рассрочки</title>
 
-    <style>
-        :root {
-            --green-1: #0a5a33;
-            --green-2: #0c6b3c;
-            --green-3: #0e7843;
-            --white: #fff;
-            --glass: rgba(255, 255, 255, .12);
-        }
+<style>
+:root {
+  --green-1:#0a5a33;
+  --green-2:#0c6b3c;
+  --green-3:#0e7843;
+  --white:#fff;
+  --glass:rgba(255,255,255,.12);
+}
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(180deg, var(--green-3), var(--green-1));
-            color: var(--white);
-        }
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(180deg,var(--green-3),var(--green-1));
+  color:var(--white);
+}
 
-        .page {
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-        }
+.page{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+}
 
-        .container {
-            width: 100%;
-            max-width: 520px;
-            padding: 16px;
-        }
+.container{
+  width:100%;
+  max-width:520px;
+  padding:16px;
+}
 
-        .header {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 24px;
-        }
+.header{
+  display:flex;
+  justify-content:center;
+  margin-bottom:24px;
+}
 
-        .header img {
-            width: 180px;
-            height: auto;
-        }
+.header img{
+  width:180px;
+  height:auto;
+}
 
-        label {
-            display: block;
-            margin-top: 16px;
-            font-size: 14px;
-            opacity: .9;
-        }
+label{
+  display:block;
+  margin-top:16px;
+  font-size:14px;
+  opacity:.9;
+}
 
-        input {
-            width: 100%;
-            padding: 12px 14px;
-            margin-top: 6px;
-            border-radius: 14px;
-            border: 2px solid rgba(255, 255, 255, .35);
-            background: transparent;
-            color: #fff;
-            font-size: 16px;
-        }
+input{
+  width:100%;
+  padding:12px 14px;
+  margin-top:6px;
+  border-radius:14px;
+  border:2px solid rgba(255,255,255,.35);
+  background:transparent;
+  color:#fff;
+  font-size:16px;
+}
 
-        input[type=range] {
-            padding: 0;
-        }
+input[type=range]{padding:0;}
 
-        .category-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 8px;
-        }
+.category-buttons{
+  display:flex;
+  gap:10px;
+  margin-top:8px;
+}
 
-        .cat-btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: 14px;
-            border: 2px solid rgba(255, 255, 255, .35);
-            background: transparent;
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            font-size: 14px;
-        }
+.cat-btn{
+  flex:1;
+  padding:12px;
+  border-radius:14px;
+  border:2px solid rgba(255,255,255,.35);
+  background:transparent;
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  cursor:pointer;
+  font-size:14px;
+}
 
-        .cat-btn img {
-            width: 20px
-        }
+.cat-btn img{width:20px}
 
-        .cat-btn.active {
-            background: rgba(255, 255, 255, .18);
-            border-color: #fff;
-        }
+.cat-btn.active{
+  background:rgba(255,255,255,.18);
+  border-color:#fff;
+}
 
-        .range-label {
-            margin-top: 6px;
-            font-size: 13px;
-            opacity: .85;
-        }
+.range-label{
+  margin-top:6px;
+  font-size:13px;
+  opacity:.85;
+}
 
-        .result {
-            margin-top: 20px;
-            background: var(--glass);
-            padding: 16px;
-            border-radius: 18px;
-        }
+.result{
+  margin-top:20px;
+  background:var(--glass);
+  padding:16px;
+  border-radius:18px;
+}
 
-        .result div {
-            margin-bottom: 8px;
-            font-size: 15px;
-        }
+.result div{
+  margin-bottom:8px;
+  font-size:15px;
+}
 
-        .button {
-            margin-top: 22px;
-            width: 100%;
-            padding: 15px;
-            border-radius: 18px;
-            border: 2px solid #fff;
-            background: transparent;
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-    </style>
+.button{
+  margin-top:22px;
+  width:100%;
+  padding:15px;
+  border-radius:18px;
+  border:2px solid #fff;
+  background:transparent;
+  color:#fff;
+  font-size:16px;
+  font-weight:600;
+  cursor:pointer;
+}
+</style>
 </head>
 
 <body>
-    <div class="page">
-        <div class="container">
+<div class="page">
+<div class="container">
 
-            <div class="header">
-                <img src="logo.png" alt="Логотип">
-            </div>
+<div class="header">
+  <img src="logo.png" alt="Логотип">
+</div>
 
-            <label>Стоимость товара</label>
-            <input type="text" id="price" value="40 000">
+<label>Стоимость товара</label>
+<input type="text" id="price" value="40 000">
 
-            <label>Категория товара</label>
-            <div class="category-buttons">
-                <div class="cat-btn active" data-cat="1">
-                    <img src="icon-phone.png"> Телефоны
-                </div>
-                <div class="cat-btn" data-cat="2">
-                    <img src="icon-box.png"> Все товары
-                </div>
-            </div>
+<label>Категория товара</label>
+<div class="category-buttons">
+  <div class="cat-btn active" data-cat="1">
+    <img src="icon-phone.png"> Телефоны
+  </div>
+  <div class="cat-btn" data-cat="2">
+    <img src="icon-box.png"> Все товары
+  </div>
+</div>
 
-            <label>Количество платежей</label>
-            <input type="range" id="term" min="4" max="12" value="6">
-            <div class="range-label" id="termLabel">6 платежей</div>
+<label>Количество платежей</label>
+<input type="range" id="term" min="4" max="12" value="6">
+<div class="range-label" id="termLabel">6 платежей</div>
 
-            <label>Первоначальный взнос (₽)</label>
-            <input type="text" id="down" value="0">
+<label>Первоначальный взнос (₽)</label>
+<input type="text" id="down" value="0">
 
-            <div class="result">
-                <div id="markup"></div>
-                <div id="monthly"></div>
-                <div id="total"></div>
-            </div>
+<div class="result">
+  <div id="markup"></div>
+  <div id="monthly"></div>
+  <div id="total"></div>
+</div>
 
-            <button class="button">Оформить заявку</button>
+<button class="button">Оформить заявку</button>
 
-        </div>
-    </div>
+</div>
+</div>
 
-    <script>
-        const phonePrice = { 4: .1667, 5: .2083, 6: .25, 7: .2917, 8: .3333, 9: .375, 10: .4167, 11: .4583, 12: .5 };
-        const phoneRest = { 4: .234, 5: .2747, 6: .3158, 7: .357, 8: .4, 9: .4426, 10: .4855, 11: .5285, 12: .5714 };
-        const allPrice = { 4: .1333, 5: .1667, 6: .2, 7: .2333, 8: .2583, 9: .2917, 10: .3167, 11: .33, 12: .35 };
-        const allRest = { 4: .186, 5: .2353, 6: .2857, 7: .3373, 8: .3769, 9: .4308, 10: .472, 11: .4944, 12: .5283 };
+<script>
+const phonePrice={4:.1667,5:.2083,6:.25,7:.2917,8:.3333,9:.375,10:.4167,11:.4583,12:.5};
+const phoneRest={4:.234,5:.2747,6:.3158,7:.357,8:.4,9:.4426,10:.4855,11:.5285,12:.5714};
+const allPrice={4:.1333,5:.1667,6:.2,7:.2333,8:.2583,9:.2917,10:.3167,11:.33,12:.35};
+const allRest={4:.186,5:.2353,6:.2857,7:.3373,8:.3769,9:.4308,10:.472,11:.4944,12:.5283};
 
-        let category = 1;
+let category=1;
 
-        function parseMoney(v) {
-            return Number(v.replace(/\s/g, '')) || 0;
-        }
+function parseMoney(v){
+  return Number(v.replace(/\s/g,''))||0;
+}
 
-        function formatMoney(v) {
-            return Math.round(v).toLocaleString('ru-RU') + ' ₽';
-        }
+function formatMoney(v){
+  return Math.round(v).toLocaleString('ru-RU')+' ₽';
+}
 
-        function round100(v) {
-            return Math.ceil(v / 100) * 100;
-        }
+function round100(v){
+  return Math.ceil(v/100)*100;
+}
 
-        function calc() {
-            const price = parseMoney(priceInput.value) + 1000;
-            const down = parseMoney(downInput.value);
-            const term = Number(termInput.value);
+function calc(){
+  const price=parseMoney(priceInput.value)+1000;
+  const down=parseMoney(downInput.value);
+  const term=Number(termInput.value);
 
-            termLabel.innerText = term + ' платежей';
+  termLabel.innerText=term+' платежей';
 
-            const priceP = category === 1 ? phonePrice : allPrice;
-            const restP = category === 1 ? phoneRest : allRest;
+  const priceP=category===1?phonePrice:allPrice;
+  const restP=category===1?phoneRest:allRest;
 
-            const minDown = (price * priceP[term]) / term;
-            const rest = price - down;
+  const minDown=(price*priceP[term])/term;
+  const rest=price-down;
 
-            const markup = (down >= minDown && down > 0)
-                ? price * priceP[term]
-                : rest * restP[term];
+  const markup=(down>=minDown && down>0)
+    ? price*priceP[term]
+    : rest*restP[term];
 
-            const total = price + markup;
-            const monthly = (total - down) / term;
+  const total=price+markup;
+  const monthly=(total-down)/term;
 
-            markupDiv.innerHTML = 'Наценка: <b>' + formatMoney(round100(markup)) + '</b>';
-            monthlyDiv.innerHTML = 'Ежемесячный платёж: <b>' + formatMoney(round100(monthly)) + '</b>';
-            totalDiv.innerHTML = 'Общая сумма: <b>' + formatMoney(round100(total)) + '</b>';
-        }
+  markupDiv.innerHTML='Наценка: <b>'+formatMoney(round100(markup))+'</b>';
+  monthlyDiv.innerHTML='Ежемесячный платёж: <b>'+formatMoney(round100(monthly))+'</b>';
+  totalDiv.innerHTML='Общая сумма: <b>'+formatMoney(round100(total))+'</b>';
+}
 
-        const priceInput = document.getElementById('price');
-        const downInput = document.getElementById('down');
-        const termInput = document.getElementById('term');
-        const termLabel = document.getElementById('termLabel');
-        const markupDiv = document.getElementById('markup');
-        const monthlyDiv = document.getElementById('monthly');
-        const totalDiv = document.getElementById('total');
+const priceInput=document.getElementById('price');
+const downInput=document.getElementById('down');
+const termInput=document.getElementById('term');
+const termLabel=document.getElementById('termLabel');
+const markupDiv=document.getElementById('markup');
+const monthlyDiv=document.getElementById('monthly');
+const totalDiv=document.getElementById('total');
 
-        document.querySelectorAll('.cat-btn').forEach(b => {
-            b.onclick = () => {
-                document.querySelectorAll('.cat-btn').forEach(x => x.classList.remove('active'));
-                b.classList.add('active');
-                category = Number(b.dataset.cat);
-                calc();
-            }
-        });
+document.querySelectorAll('.cat-btn').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    category=Number(b.dataset.cat);
+    calc();
+  }
+});
 
-        document.querySelectorAll('input').forEach(i => i.addEventListener('input', calc));
+document.querySelectorAll('input').forEach(i=>i.addEventListener('input',calc));
 
-        calc();
-    </script>
+calc();
+</script>
 </body>
-
 </html>
