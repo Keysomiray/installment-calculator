@@ -1,261 +1,185 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Калькулятор рассрочки</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калькулятор рассрочки</title>
 
-    <style>
-        :root {
-            --green-1: #0a5f36;
-            --green-2: #0c6b3c;
-            --green-3: #0e7843;
-            --white: #ffffff;
-            --glass: rgba(255, 255, 255, 0.12);
-        }
+<style>
+:root{
+  --green:#0f7a44;
+  --green-dark:#0b5f35;
+  --white:#fff;
+  --glass:rgba(255,255,255,.12);
+}
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(180deg, var(--green-3), var(--green-1));
-            min-width: 375px;
-            max-width: 420px;
-            color: var(--white);
-        }
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(180deg,var(--green),var(--green-dark));
+  color:var(--white);
+}
 
-        .container {
-            padding: 16px;
-        }
+.container{
+  max-width:520px;
+  margin:0 auto;
+  padding:16px;
+}
 
-        .card {
-            background: transparent;
-            border-radius: 22px;
-            padding: 16px;
-        }
+.header{
+  text-align:center;
+  margin-bottom:24px;
+}
 
-        /* ===== HEADER ===== */
-        .header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 18px;
-        }
+.header img{
+  width:180px;
+}
 
-        .header img {
-            width: 42px;
-            height: 42px;
-        }
+label{
+  display:block;
+  margin-top:16px;
+  font-size:14px;
+}
 
-        .header h2 {
-            margin: 0;
-            font-weight: 600;
-            font-size: 20px;
-        }
+input[type=number],
+input[type=text]{
+  width:100%;
+  padding:14px;
+  margin-top:6px;
+  border-radius:14px;
+  border:2px solid rgba(255,255,255,.35);
+  background:transparent;
+  color:#fff;
+  font-size:16px;
+}
 
-        /* ===== FORM ===== */
-        label {
-            display: block;
-            margin-top: 14px;
-            font-size: 14px;
-            opacity: 0.9;
-        }
+input[type=range]{
+  width:100%;
+  margin-top:10px;
+}
 
-        input,
-        select {
-            width: 100%;
-            padding: 12px;
-            margin-top: 6px;
-            border-radius: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.35);
-            background: transparent;
-            color: var(--white);
-            font-size: 16px;
-        }
+.category{
+  display:flex;
+  gap:10px;
+  margin-top:8px;
+}
 
-        input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-        }
+.cat{
+  flex:1;
+  padding:12px;
+  border-radius:14px;
+  border:2px solid rgba(255,255,255,.35);
+  text-align:center;
+  cursor:pointer;
+}
 
-        select option {
-            color: #000;
-        }
+.cat.active{
+  background:rgba(255,255,255,.18);
+  border-color:#fff;
+}
 
-        input[type=range] {
-            padding: 0;
-        }
+.value{
+  margin-top:6px;
+  font-size:13px;
+  opacity:.85;
+}
 
-        .range-label {
-            font-size: 13px;
-            margin-top: 6px;
-            opacity: 0.85;
-        }
+.result{
+  margin-top:20px;
+  background:var(--glass);
+  padding:16px;
+  border-radius:18px;
+}
 
-        /* ===== RESULT ===== */
-        .result {
-            margin-top: 18px;
-            background: var(--glass);
-            padding: 14px;
-            border-radius: 16px;
-        }
-
-        .result div {
-            margin-bottom: 8px;
-            font-size: 15px;
-        }
-
-        small {
-            font-size: 12px;
-            opacity: 0.8;
-        }
-
-        /* ===== BUTTON ===== */
-        .button {
-            margin-top: 20px;
-            width: 100%;
-            padding: 14px;
-            border-radius: 16px;
-            border: 2px solid #fff;
-            background: transparent;
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-    </style>
+.result div{
+  margin-bottom:8px;
+  font-size:15px;
+}
+</style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="card">
+<div class="container">
 
-            <!-- HEADER -->
-            <div class="header">
-                <img src="logo.png" alt="Логотип">
-                <h2>Товары в рассрочку</h2>
-            </div>
+<div class="header">
+  <img src="logo.png">
+</div>
 
-            <label>Стоимость товара (₽)</label>
-            <input type="number" id="price" value="40000" min="25000" max="80000">
+<label>Стоимость товара</label>
+<input type="number" id="price" value="40000" min="25000" max="80000">
 
-            <label>Категория товара</label>
-            <input type="range" id="category" min="1" max="2" step="1" value="1">
-            <div class="range-label" id="categoryLabel">Телефоны</div>
+<label>Категория товара</label>
+<div class="category">
+  <div class="cat active" data-cat="1">Телефоны</div>
+  <div class="cat" data-cat="2">Все товары</div>
+</div>
 
-            <label>Срок рассрочки</label>
-            <select id="term">
-                <option value="4">4 месяца</option>
-                <option value="5">5 месяцев</option>
-                <option value="6" selected>6 месяцев</option>
-                <option value="7">7 месяцев</option>
-                <option value="8">8 месяцев</option>
-                <option value="9">9 месяцев</option>
-                <option value="10">10 месяцев</option>
-                <option value="11">11 месяцев</option>
-                <option value="12">12 месяцев</option>
-            </select>
+<label>Количество платежей</label>
+<input type="range" id="term" min="4" max="12" value="6">
+<div class="value" id="termLabel">6 платежей</div>
 
-            <label>Первоначальный взнос (%)</label>
-            <input type="range" id="downPercent" min="0" max="50" value="20">
-            <div class="range-label" id="downLabel">20%</div>
+<label>Первоначальный взнос (₽)</label>
+<input type="number" id="down" value="0">
 
-            <div class="result">
-                <div id="downPay"></div>
-                <div id="minDown"></div>
-                <div id="markup"></div>
-                <div id="monthly"></div>
-                <div id="total"></div>
-            </div>
+<div class="result">
+  <div id="monthly"></div>
+  <div id="total"></div>
+</div>
 
-            <button class="button">Оформить заявку</button>
+</div>
 
-        </div>
-    </div>
+<script>
+const phonePrice={4:.1667,5:.2083,6:.25,7:.2917,8:.3333,9:.375,10:.4167,11:.4583,12:.5};
+const phoneRest={4:.234,5:.2747,6:.3158,7:.357,8:.4,9:.4426,10:.4855,11:.5285,12:.5714};
+const allPrice={4:.1333,5:.1667,6:.2,7:.2333,8:.2583,9:.2917,10:.3167,11:.33,12:.35};
+const allRest={4:.186,5:.2353,6:.2857,7:.3373,8:.3769,9:.4308,10:.472,11:.4944,12:.5283};
 
-    <script>
-        // ===== ПРОЦЕНТЫ =====
-        const phonePricePercent = {
-            4: 0.1667, 5: 0.2083, 6: 0.25, 7: 0.2917, 8: 0.3333, 9: 0.375,
-            10: 0.4167, 11: 0.4583, 12: 0.5
-        };
-        const phoneRestPercent = {
-            4: 0.234, 5: 0.2747, 6: 0.3158, 7: 0.357, 8: 0.4, 9: 0.4426,
-            10: 0.4855, 11: 0.5285, 12: 0.5714
-        };
+let category=1;
 
-        const allPricePercent = {
-            4: 0.1333, 5: 0.1667, 6: 0.2, 7: 0.2333, 8: 0.2583, 9: 0.2917,
-            10: 0.3167, 11: 0.33, 12: 0.35
-        };
-        const allRestPercent = {
-            4: 0.186, 5: 0.2353, 6: 0.2857, 7: 0.3373, 8: 0.3769, 9: 0.4308,
-            10: 0.472, 11: 0.4944, 12: 0.5283
-        };
+function fmt(v){
+  return Math.ceil(v/100)*100
+    .toLocaleString('ru-RU')+' ₽';
+}
 
-        function round100(v) {
-            return Math.ceil(v / 100) * 100;
-        }
+function calc(){
+  const price=Number(priceInput.value)+1000;
+  const down=Number(downInput.value);
+  const term=Number(termInput.value);
 
-        function calculate() {
-            const price = Number(priceInput.value);
-            const category = Number(categoryInput.value);
-            const term = Number(termSelect.value);
-            const downPercent = Number(downInput.value);
+  termLabel.innerText=term+' платежей';
 
-            const basePrice = price + 1000;
-            const downPayment = basePrice * downPercent / 100;
+  const p=category===1?phonePrice:allPrice;
+  const r=category===1?phoneRest:allRest;
 
-            const priceP = category === 1 ? phonePricePercent : allPricePercent;
-            const restP = category === 1 ? phoneRestPercent : allRestPercent;
+  const min=(price*p[term])/term;
+  const rest=price-down;
 
-            const minDown = (basePrice * priceP[term]) / term;
-            const rest = basePrice - downPayment;
+  const markup=(down>=min && down>0)?price*p[term]:rest*r[term];
+  const total=price+markup;
+  const monthly=(total-down)/term;
 
-            let markup, type;
-            if (downPayment >= minDown && downPayment > 0) {
-                markup = basePrice * priceP[term];
-                type = 'процент на стоимость';
-            } else {
-                markup = rest * restP[term];
-                type = 'процент на остаток';
-            }
+  monthlyDiv.innerHTML='Ежемесячный платёж: <b>'+fmt(monthly)+'</b>';
+  totalDiv.innerHTML='Общая сумма: <b>'+fmt(total)+'</b>';
+}
 
-            const total = basePrice + markup;
-            const monthly = (total - downPayment) / term;
+const priceInput=document.getElementById('price');
+const downInput=document.getElementById('down');
+const termInput=document.getElementById('term');
+const termLabel=document.getElementById('termLabel');
+const monthlyDiv=document.getElementById('monthly');
+const totalDiv=document.getElementById('total');
 
-            downPay.innerHTML = `Первоначальный взнос: <b>${round100(downPayment)} ₽</b>`;
-            minDown.innerHTML = `Минимальный взнос: ${round100(minDown)} ₽`;
-            markupDiv.innerHTML = `Наценка: <b>${round100(markup)} ₽</b><br><small>${type}</small>`;
-            monthlyDiv.innerHTML = `Ежемесячный платёж: <b>${round100(monthly)} ₽</b>`;
-            totalDiv.innerHTML = `Общая сумма: <b>${round100(total)} ₽</b>`;
-        }
+document.querySelectorAll('.cat').forEach(c=>{
+  c.onclick=()=>{
+    document.querySelectorAll('.cat').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active');
+    category=Number(c.dataset.cat);
+    calc();
+  };
+});
 
-        // DOM
-        const priceInput = document.getElementById('price');
-        const categoryInput = document.getElementById('category');
-        const termSelect = document.getElementById('term');
-        const downInput = document.getElementById('downPercent');
-
-        const downPay = document.getElementById('downPay');
-        const minDown = document.getElementById('minDown');
-        const markupDiv = document.getElementById('markup');
-        const monthlyDiv = document.getElementById('monthly');
-        const totalDiv = document.getElementById('total');
-
-        document.querySelectorAll('input, select').forEach(el =>
-            el.addEventListener('input', calculate)
-        );
-
-        downInput.addEventListener('input', e =>
-            downLabel.innerText = e.target.value + '%'
-        );
-
-        categoryInput.addEventListener('input', e =>
-            categoryLabel.innerText = e.target.value == 1 ? 'Телефоны' : 'Все товары'
-        );
-
-        calculate();
-    </script>
+document.querySelectorAll('input').forEach(i=>i.addEventListener('input',calc));
+calc();
+</script>
 </body>
-
 </html>
