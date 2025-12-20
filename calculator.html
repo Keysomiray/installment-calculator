@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hambo — Калькулятор рассрочки</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --green: #0f7a44;
+            --green-dark: #0b5f35;
+            --red: #cc1313;
+            --track: rgba(255, 255, 255, .35);
+            --glass: rgba(255, 255, 255, .12);
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(180deg, var(--green), var(--green-dark));
+            color: #fff;
+        }
+
+        .container {
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 16px
+        }
+
+        .content {
+            max-width: 480px;
+            margin: 0 auto
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px
+        }
+
+        .header img {
+            width: 180px
+        }
+
+        .card,
+        .result {
+            background: var(--glass);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 16px;
+        }
+
+
+        label {
+            display: block;
+            margin-top: 14px;
+            font-size: 14px;
+            font-weight: 500
+        }
+
+        input[type=text] {
+            width: 100%;
+            padding: 14px;
+            margin-top: 6px;
+            border-radius: 14px;
+            border: 2px solid rgba(255, 255, 255, .35);
+            background: transparent;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        /* CATEGORY */
+        .category {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px
+        }
+
+        .cat {
+            flex: 1;
+            padding: 12px;
+            border-radius: 14px;
+            border: 2px solid rgba(255, 255, 255, .35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: .25s;
+        }
+
+        .cat img {
+            width: 36px;
+            height: 36px
+        }
+
+        .cat:hover {
+            background: rgba(255, 255, 255, .12);
+            transform: translateY(-1px)
+        }
+
+        .cat:active {
+            transform: scale(.97)
+        }
+
+        .cat.active {
+            background: rgba(255, 255, 255, .22);
+            border-color: #fff;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, .18);
+        }
+
+        /* RANGE */
+        .range-wrap {
+            position: relative;
+            --thumb-x: 0px
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 3px;
+            margin-top: 1px;
+            border-radius: 4px;
+            outline: none;
+            background: linear-gradient(to right, var(--red) 0%, var(--red) 0%, var(--track) 0%, var(--track) 100%);
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--red);
+            cursor: pointer;
+            position: relative;
+            z-index: 3;
+        }
+
+        /* RIPPLE */
+        .range-ripple {
+            position: absolute;
+            top: calc(50% + 4px);
+            left: var(--thumb-x);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 5px solid rgba(201, 7, 7, 0.9521);
+            transform: translate(-50%, -50%) scale(.65);
+            opacity: 0;
+            pointer-events: none;
+            transition: transform .75s ease, opacity .7s ease;
+        }
+
+        .range-ripple.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .value {
+            margin-top: 6px;
+            font-size: 13px;
+            opacity: .85
+        }
+
+        .min-down {
+            margin-top: 6px;
+            font-size: 12px;
+            opacity: .8;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 10px;
+            cursor: pointer;
+            user-select: none;
+            transition: background .2s ease, transform .12s ease;
+        }
+
+        .min-down:hover {
+            background: rgba(255, 255, 255, .12)
+        }
+
+        .min-down:active {
+            transform: scale(.96)
+        }
+
+        .result div {
+            margin-bottom: 8px;
+            font-size: 15px;
+            font-weight: 500
+        }
+
+        .wa-btn {
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px;
+            border-radius: 16px;
+
+            background: rgba(37, 211, 102, .18);
+            border: 2px solid rgba(255, 255, 255, .35);
+
+            color: #fff;
+            /* 👈 БЕЛЫЙ ТЕКСТ */
+            font-family: 'Montserrat', Arial, sans-serif;
+            /* 👈 ТОЧНО Montserrat */
+            font-weight: 500;
+            font-size: 15px;
+            text-decoration: none;
+
+            transition:
+                background .25s ease,
+                transform .12s ease;
+        }
+
+        .wa-btn:hover {
+            background: rgba(37, 211, 102, .28);
+        }
+
+        .wa-btn:active {
+            transform: scale(.96);
+        }
+
+        .wa-btn img {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+        }
+
+        /* PHONE SUBCATEGORIES */
+        .phone-modes {
+            display: none;
+            margin-top: 6px;
+            gap: 6px;
+            flex-direction: column;
+        }
+
+        .phone-modes.active {
+            display: flex;
+        }
+
+        .phone-mode {
+            height: calc((100% - 6px) / 2);
+            /* две кнопки + зазор */
+            padding: 8px;
+            border-radius: 10px;
+            border: 2px solid rgba(255, 255, 255, .35);
+
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+
+            cursor: pointer;
+            user-select: none;
+
+            transition:
+                background .2s ease,
+                transform .12s ease,
+                box-shadow .2s ease;
+        }
+
+        .phone-mode:hover {
+            background: rgba(255, 255, 255, .12);
+        }
+
+        .phone-mode:active {
+            transform: scale(.97);
+        }
+
+        .phone-mode.active {
+            background: rgba(255, 255, 255, .22);
+            border-color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .18);
+        }
+
+        .phone-cat {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 10px;
+        }
+
+        .cat-main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .cat-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .phone-modes {
+            width: 100%;
+        }
+
+        .wa-wrap {
+            position: relative;
+        }
+
+        .wa-tooltip {
+            position: absolute;
+            left: 50%;
+            bottom: 100%;
+            transform: translateX(-50%) translateY(8px);
+            margin-bottom: 8px;
+
+            background: rgba(0, 0, 0, .85);
+            color: #fff;
+            font-size: 12px;
+            line-height: 1.3;
+            padding: 8px 10px;
+            border-radius: 8px;
+
+            width: max-content;
+            max-width: 260px;
+            text-align: center;
+
+            opacity: 0;
+            pointer-events: none;
+
+            transition: opacity .25s ease, transform .25s ease;
+            z-index: 10;
+        }
+
+        .wa-tooltip.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* PC hover */
+        .wa-wrap:hover .wa-tooltip {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header"><img src="logo.png"></div>
+
+        <div class="content">
+            <div class="card">
+
+                <label>Стоимость товара:</label>
+                <input type="text" id="price">
+
+                <label></label>
+                <div class="category">
+
+                    <div class="cat-wrap">
+                        <div class="cat active" data-cat="1">
+                            <img src="icon-phone.png">Телефоны
+                        </div>
+
+                        <div class="phone-modes" id="phoneModes">
+                            <div class="phone-mode active" data-mode="minDown">↓ Взнос</div>
+                            <div class="phone-mode" data-mode="minMarkup">↓ Наценка</div>
+                        </div>
+                    </div>
+
+                    <div class="cat" data-cat="2">
+                        <img src="icon-box.png">Другие товары
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <label>Количество платежей:</label>
+            <div class="range-wrap" id="rangeWrap">
+                <input type="range" id="term" min="4" max="12" value="6">
+                <div class="range-ripple" id="rangeRipple"></div>
+            </div>
+            <div class="value" id="termLabel"></div>
+
+            <label>Первоначальный взнос:</label>
+            <input type="text" id="down">
+            <div class="min-down" id="minDown"></div>
+
+        </div>
+
+        <div class="result">
+            <div id="monthly"></div>
+            <div id="total"></div>
+        </div>
+        <div class="wa-wrap">
+            <a href="https://wa.me/79298533232" target="_blank" class="wa-btn" id="waBtn">
+                <img src="whatsapp-icon.png" alt="WhatsApp">
+                Написать нам
+            </a>
+
+            <div class="wa-tooltip" id="waTooltip">
+                Отправить расчёты калькулятора для рассмотрения менеджером.
+            </div>
+        </div>
+
+
+
+
+
+
+        <script>
+            let lastResult = {
+                price: 0,
+                down: 0,
+                rest: 0,
+                monthly: 0,
+                total: 0
+            };
+
+            /* UX */
+            const clickSound = new Audio('click.mp3');
+            clickSound.volume = 0.85;
+            function feedback() {
+                if (navigator.vibrate) navigator.vibrate(12);
+                try { clickSound.currentTime = 0; clickSound.play() } catch (e) { }
+            }
+
+            /* TABLES */
+            const phonePrice = { 4: .1667, 5: .2083, 6: .25, 7: .2917, 8: .3333, 9: .375, 10: .4167, 11: .4583, 12: .5 };
+            const phoneRest = { 4: .234, 5: .2747, 6: .3158, 7: .357, 8: .4, 9: .4426, 10: .4855, 11: .5285, 12: .5714 };
+            const phonePriceAlt = {
+                4: 0.15,
+                5: 0.175,
+                6: 0.20,
+                7: 0.2333,
+                8: 0.2667,
+                9: 0.30,
+                10: 0.3333,
+                11: 0.3667,
+                12: 0.40
+            };   // для "Минимальная наценка"
+            const phoneRestAlt = {
+                4: 0.2,
+                5: 0.233333333,
+                6: 0.28,
+                7: 0.3112,
+                8: 0.3556,
+                9: 0.4,
+                10: 0.444533333,
+                11: 0.488933333,
+                12: 0.533333333
+            };
+
+
+            const allPrice = {
+                4: 0.1417,
+                5: 0.1758,
+                6: 0.21,
+                7: 0.2442,
+                8: 0.2783,
+                9: 0.3125,
+                10: 0.3467,
+                11: 0.3808,
+                12: 0.415
+            };
+            const allRest = {
+                4: 0.188986667,
+                5: 0.2344,
+                6: 0.28,
+                7: 0.3256,
+                8: 0.371066667,
+                9: 0.416666667,
+                10: 0.462266667,
+                11: 0.507733333,
+                12: 0.553333333
+            };
+
+
+            const allPrice150t = {
+                4: 0.1233,
+                5: 0.1517,
+                6: 0.18,
+                7: 0.2083,
+                8: 0.2367,
+                9: 0.265,
+                10: 0.2933,
+                11: 0.3217,
+                12: 0.35
+            };
+            const allRest150t = {
+                4: 0.1644,
+                5: 0.202266667,
+                6: 0.28,
+                7: 0.277733333,
+                8: 0.3156,
+                9: 0.353333333,
+                10: 0.391066667,
+                11: 0.428933333,
+                12: 0.466666667
+            };
+
+
+            let phoneMode = 'minDown'; // 'minDown' | 'minMarkup'
+
+            let category = 1, lastTerm = 6, userTouchedDown = false;
+
+            /* helpers */
+            const digits = v => v.replace(/\D/g, '');
+            const bank = v => (Math.ceil(v / 100) * 100).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
+
+            /* DOM */
+            const priceInput = document.getElementById('price');
+            const downInput = document.getElementById('down');
+            const termInput = document.getElementById('term');
+            const rangeWrap = document.getElementById('rangeWrap');
+            const ripple = document.getElementById('rangeRipple');
+            const termLabel = document.getElementById('termLabel');
+            const monthlyDiv = document.getElementById('monthly');
+            const totalDiv = document.getElementById('total');
+            const minDownDiv = document.getElementById('minDown');
+
+            /* money input */
+            function bindMoneyInput(el, isDown = false) {
+                let original = '', editing = false;
+                el.addEventListener('focus', () => { original = el.value; editing = false; el.value = '' });
+                el.addEventListener('keydown', e => {
+                    if (e.key === 'Escape') { el.value = original; el.blur() }
+                    if (e.key === 'Enter') el.blur();
+                });
+                el.addEventListener('input', () => {
+                    editing = true; el.value = digits(el.value);
+                    if (isDown) userTouchedDown = true;
+                });
+                el.addEventListener('blur', () => {
+                    if (!editing) { el.value = original; return }
+                    el.value = bank(Number(el.value) || 0); calc();
+                });
+            }
+            bindMoneyInput(priceInput);
+            bindMoneyInput(downInput, true);
+
+            /* CALC */
+            function calc() {
+                const price = Number(digits(priceInput.value));
+                const downRaw = Number(digits(downInput.value));
+                const term = lastTerm, N = term - 1;
+                let down = downRaw;
+
+                let p, r;
+
+                if (category === 1) {
+                    // Телефоны
+                    if (phoneMode === 'minDown') {
+                        // Минимальный взнос (старая логика)
+                        p = phonePrice;
+                        r = phoneRest;
+                    } else {
+                        // Минимальная наценка (новые таблицы)
+                        p = phonePriceAlt;
+                        r = phoneRestAlt;
+                    }
+
+                } else {
+                    // Другие товары — НЕ ТРОГАЕМ
+                    if (price <= 150000) {
+                        p = allPrice;
+                        r = allRest;
+                    } else {
+                        p = allPrice150t;
+                        r = allRest150t;
+                    }
+                }
+
+                let minDown;
+
+                if (category === 1) {
+                    // Телефоны
+                    if (phoneMode === 'minDown') {
+                        // Минимальный взнос — телефонная логика
+                        minDown = Math.ceil(((price + 1000) * (p[term] + 1) / term) / 100) * 100;
+                    } else {
+                        // Минимальная наценка — как "Другие товары"
+                        minDown = Math.ceil((price * 0.25) / 100) * 100;
+                    }
+                } else {
+                    // Другие товары
+                    minDown = Math.ceil((price * 0.25) / 100) * 100;
+                }
+
+
+                minDownDiv.innerText = 'Минимальный взнос: ' + bank(minDown);
+
+                if (!userTouchedDown) {
+                    down = minDown;
+                    downInput.value = bank(minDown);
+                }
+
+                let totalCost;
+                if (down === minDown) {
+                    totalCost = (price + 1000) * (p[term] + 1);
+                } else {
+                    totalCost = (price + 1000 - down) * (r[term] + 1) + down;
+                }
+
+                const monthly = Math.ceil(((totalCost - down) / N) / 100) * 100;
+                const total = monthly * N + down;
+                function paymentWord(n) {
+                    n = Math.abs(n) % 100;
+                    const n1 = n % 10;
+
+                    if (n > 10 && n < 20) return 'платежей';
+                    if (n1 === 1) return 'платёж';
+                    if (n1 >= 2 && n1 <= 4) return 'платежа';
+                    return 'платежей';
+                }
+                lastResult = {
+                    price: price,
+                    down: down,
+                    rest: total - down,
+                    monthly: monthly,
+                    total: total
+                };
+
+
+                termLabel.innerText = term + ' ' + paymentWord(term);
+
+                const markupValue = total - price;
+
+                monthlyDiv.innerHTML =
+
+                    'Остаток: <b>' + bank(total - down) + '</b><br>' +
+                    'Ежемесячный платёж: <b>' + bank(monthly) + '</b>';
+
+                totalDiv.innerHTML =
+                    'Общая сумма: <b>' + bank(total) + '</b>';
+
+            }
+            function buildWhatsAppText() {
+                let categoryText = category === 1 ? 'Телефоны' : 'Другие товары';
+
+                if (category === 1) {
+                    categoryText += phoneMode === 'minDown'
+                        ? ' (Минимальный взнос)'
+                        : ' (Минимальная наценка)';
+                }
+
+                return `
+Здравствуйте!
+Интересует рассрочка:
+
+Категория товара: ${categoryText}
+Стоимость товара: ${bank(lastResult.price)}
+Платежей: ${lastTerm}
+
+Взнос: ${bank(lastResult.down)}
+Остаток: ${bank(lastResult.rest)}
+Ежемесячный платёж: ${bank(lastResult.monthly)}
+Общая сумма: ${bank(lastResult.total)}
+`.trim();
+            }
+
+            /* click min down */
+            minDownDiv.addEventListener('click', () => {
+                feedback();
+                const v = digits(minDownDiv.innerText);
+                if (!v) return;
+                userTouchedDown = true;
+                downInput.value = bank(Number(v));
+                downInput.focus(); downInput.blur();
+                calc();
+            });
+
+            /* SLIDER SYNC — 100% СИНХРОН */
+            function updateSlider() {
+                const min = +termInput.min;
+                const max = +termInput.max;
+                const val = +termInput.value;
+                const percent = (val - min) / (max - min);
+
+                termInput.style.background =
+                    `linear-gradient(to right,var(--red) 0%,var(--red) ${percent * 100}%,var(--track) ${percent * 100}%,var(--track) 100%)`;
+
+                const thumbSize = 18;
+                const track = termInput.clientWidth - thumbSize;
+                const x = percent * track + thumbSize / 2 + 2;
+
+                rangeWrap.style.setProperty('--thumb-x', x + 'px');
+            }
+
+
+            termInput.addEventListener('input', () => {
+                lastTerm = +termInput.value;
+                updateSlider();
+                calc();
+            });
+            termInput.addEventListener('pointerdown', () => { ripple.classList.add('active'); updateSlider() });
+            document.addEventListener('pointerup', () => ripple.classList.remove('active'));
+
+            /* category */
+            document.querySelectorAll('.cat').forEach(c => {
+                c.onclick = () => {
+                    feedback();
+
+                    document.querySelectorAll('.cat').forEach(x => x.classList.remove('active'));
+                    c.classList.add('active');
+
+                    category = +c.dataset.cat;
+                    userTouchedDown = false;
+
+                    const modes = document.getElementById('phoneModes');
+                    if (category === 1) {
+                        modes.classList.add('active');
+                    } else {
+                        modes.classList.remove('active');
+                    }
+
+                    calc();
+                };
+            });
+            document.querySelectorAll('.phone-mode').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    feedback();
+
+                    document.querySelectorAll('.phone-mode')
+                        .forEach(b => b.classList.remove('active'));
+
+                    btn.classList.add('active');
+                    phoneMode = btn.dataset.mode;
+
+                    userTouchedDown = false;
+                    calc();
+                });
+            });
+
+
+            /* init */
+            priceInput.value = bank(75000);
+            updateSlider();
+            calc();
+            const waBtn = document.getElementById('waBtn');
+            const waTooltip = document.getElementById('waTooltip');
+            let waTouched = false;
+            let tooltipTimer = null;
+
+            if (waBtn) {
+                waBtn.addEventListener('click', e => {
+                    feedback();
+
+                    // Мобильный первый тап — показать подсказку
+                    if (!waTouched && window.matchMedia('(hover: none)').matches) {
+                        e.preventDefault();
+                        waTouched = true;
+
+                        waTooltip.classList.add('show');
+
+                        clearTimeout(tooltipTimer);
+                        tooltipTimer = setTimeout(() => {
+                            waTooltip.classList.remove('show');
+                            waTouched = false;
+                        }, 2500);
+
+                        return;
+                    }
+
+                    // ПК или второй тап — переход в WhatsApp
+                    const text = buildWhatsAppText();
+                    const encoded = encodeURIComponent(text);
+                    waBtn.href = `https://wa.me/79298533232?text=${encoded}`;
+                });
+            }
+
+
+        </script>
+
+</body>
+
+</html>
