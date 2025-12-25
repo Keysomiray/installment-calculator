@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hambo — Калькулятор рассрочки</title>
+    <link rel="icon" href="favicon.jpg">
+    <link rel="apple-touch-icon" href="favicon.jpg">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #40BF95;
+            --primary-dark: #0D7359;
+            --primary-darker: #024034;
+            --secondary: #F2C84B;
+            --accent: #F28C8C;
+            --bg-start: #F2F2F2;
+            --bg-end: #E5E5E5;
+            --surface: #ffffff;
+            --surface-hover: #f8f8f8;
+            --text-primary: #024034;
+            --text-secondary: #0D7359;
+            --text-muted: #737373;
+            --border: #d9d9d9;
+            --border-focus: #40BF95;
+            --shadow-sm: 0 1px 2px rgba(13, 115, 89, 0.05);
+            --shadow-md: 0 4px 12px rgba(13, 115, 89, 0.08);
+            --shadow-lg: 0 12px 32px rgba(13, 115, 89, 0.12);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        [data-theme="dark"] {
+            --bg-start: #0a1612;
+            --bg-end: #1a2e28;
+            --surface: #1e2f2a;
+            --surface-hover: #253933;
+            --text-primary: #ffffff;
+            --text-secondary: #ffffff;
+            --text-muted: #ffffff;
+            --border: #2d4039;
+            --border-focus: #40BF95;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+            z-index: 100;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.95);
+        }
+
+        .theme-toggle svg {
+            width: 24px;
+            height: 24px;
+            fill: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle .sun-icon {
+            display: none;
+        }
+
+        .theme-toggle .moon-icon {
+            display: block;
+        }
+
+        [data-theme="dark"] .theme-toggle .sun-icon {
+            display: block;
+        }
+
+        [data-theme="dark"] .theme-toggle .moon-icon {
+            display: none;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .header img {
+            width: 160px;
+            filter: drop-shadow(0 2px 8px rgba(15, 122, 68, 0.15));
+        }
+
+        [data-theme="dark"] .header img {
+            content: url('logo-dark.png');
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--primary);
+            margin-top: 16px;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 15px;
+            color: var(--text-muted);
+            margin-top: 8px;
+            font-weight: 300;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease-out;
+            animation-delay: 0.1s;
+            animation-fill-mode: both;
+        }
+
+        .section {
+            margin-bottom: 28px;
+        }
+
+        .section:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input[type=text] {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--border);
+            background: var(--surface);
+            color: var(--text-primary);
+            font-size: 20px;
+            font-weight: 500;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        input[type=text]:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 4px rgba(15, 122, 68, 0.08);
+            transform: translateY(-1px);
+        }
+
+        input[type=text]:hover:not(:focus) {
+            border-color: var(--primary-light);
+        }
+
+        /* Category Selector */
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 10px;
+            align-items: start;
+        }
+
+        .cat-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cat {
+            width: 100%;
+            padding: 20px 16px;
+            border-radius: var(--radius-md);
+            border: 2px solid var(--border);
+            background: var(--surface);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cat::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .cat-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .cat img {
+            width: 40px;
+            height: 40px;
+            transition: transform 0.3s ease;
+        }
+
+        .cat-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+
+        .cat:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .cat:hover img {
+            transform: scale(1.1);
+        }
+
+        .cat.active {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .cat.active::before {
+            opacity: 1;
+        }
+
+        .cat.active .cat-label {
+            color: white;
+        }
+
+        /* Phone modes */
+        .phone-modes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .phone-modes.hidden {
+            display: none;
+        }
+
+        .phone-mode {
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--border);
+            background: var(--surface);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .phone-mode:hover {
+            border-color: var(--primary);
+            background: var(--surface-hover);
+        }
+
+        .phone-mode.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Range Slider */
+        .range-container {
+            padding: 8px 0;
+        }
+
+        .range-wrapper {
+            position: relative;
+            padding: 12px 0;
+        }
+
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+            background: var(--border);
+            cursor: pointer;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: grab;
+            box-shadow: 0 2px 8px rgba(15, 122, 68, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(15, 122, 68, 0.4);
+        }
+
+        input[type=range]::-webkit-slider-thumb:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+        }
+
+        input[type=range]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: grab;
+            border: none;
+            box-shadow: 0 2px 8px rgba(15, 122, 68, 0.3);
+        }
+
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .term-value {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-secondary);
+        }
+
+        /* Min down hint */
+        .min-down-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .min-down-hint:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .min-down-hint svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Results */
+        .results {
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            color: var(--primary-dark);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease-out;
+            animation-delay: 0.2s;
+            animation-fill-mode: both;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-row:nth-child(3) {
+            border-bottom: none;
+        }
+
+        .result-row:first-child {
+            padding-top: 0;
+        }
+
+        .result-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .result-value {
+            font-size: 20px;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.5px;
+            color: var(--primary-dark);
+        }
+
+        [data-theme="dark"] .result-value {
+            color: #ffffff;
+        }
+
+        .result-total {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .result-total .result-label {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .result-total .result-value {
+            font-size: 28px;
+            font-weight: 800;
+        }
+
+        /* WhatsApp Button */
+        .wa-button-wrapper {
+            margin-top: 20px;
+            animation: fadeInUp 0.6s ease-out;
+            animation-delay: 0.3s;
+            animation-fill-mode: both;
+        }
+
+        .wa-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 18px 32px;
+            border-radius: var(--radius-lg);
+            background: #40BF95;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 16px rgba(64, 191, 149, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .wa-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .wa-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(64, 191, 149, 0.4);
+        }
+
+        .wa-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .wa-button:active {
+            transform: translateY(0);
+        }
+
+        [data-theme="dark"] .wa-button {
+            background: #0D7359;
+        }
+
+        [data-theme="dark"] .wa-button:hover {
+            box-shadow: 0 8px 24px rgba(13, 115, 89, 0.5);
+        }
+
+        .wa-button img {
+            width: 24px;
+            height: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .wa-button span {
+            position: relative;
+            z-index: 1;
+        }
+
+        .wa-tooltip {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(0.98);
+            }
+        }
+
+        .haptic {
+            animation: pulse 0.15s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .theme-toggle {
+                top: 16px;
+                right: 16px;
+                width: 44px;
+                height: 44px;
+            }
+
+            .theme-toggle svg {
+                width: 20px;
+                height: 20px;
+            }
+
+            body {
+                padding: 16px;
+            }
+
+            .card {
+                padding: 24px;
+            }
+
+            .results {
+                padding: 24px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            input[type=text] {
+                font-size: 18px;
+                padding: 14px 16px;
+            }
+
+            .result-value {
+                font-size: 18px;
+            }
+
+            .result-total .result-value {
+                font-size: 24px;
+            }
+        }
+
+        /* Focus visible for accessibility */
+        *:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Переключить тему">
+        <svg class="sun-icon" viewBox="0 0 24 24">
+            <path d="M12 17.5C14.7614 17.5 17 15.2614 17 12.5C17 9.73858 14.7614 7.5 12 7.5C9.23858 7.5 7 9.73858 7 12.5C7 15.2614 9.23858 17.5 12 17.5Z"/>
+            <path d="M12 1.5V3.5M12 21.5V23.5M4.22 4.72L5.64 6.14M18.36 18.86L19.78 20.28M1.5 12.5H3.5M20.5 12.5H22.5M4.22 20.28L5.64 18.86M18.36 6.14L19.78 4.72" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <svg class="moon-icon" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+    </button>
+
+    <div class="container">
+        <div class="header">
+            <img src="logo.png" alt="Hambo">
+        </div>
+
+        <div class="card">
+            <div class="section">
+                <label>Стоимость товара:</label>
+                <div class="input-wrapper">
+                    <input type="text" id="price" placeholder="0 ₽">
+                </div>
+            </div>
+
+            <div class="section">
+                <label>Категория товара:</label>
+                <div class="category-grid">
+                    <div class="cat-item">
+                        <div class="cat" data-cat="1">
+                            <div class="cat-content">
+                                <img src="icon-phone.png" alt="Телефоны">
+                                <span class="cat-label">Телефоны</span>
+                            </div>
+                        </div>
+                        <div class="phone-modes hidden" id="phoneModes">
+                            <div class="phone-mode active" data-mode="minDown">↓ Взнос</div>
+                            <div class="phone-mode" data-mode="minMarkup">↓ Наценка</div>
+                        </div>
+                    </div>
+                    <div class="cat-item">
+                        <div class="cat active" data-cat="2">
+                            <div class="cat-content">
+                                <img src="icon-box.png" alt="Другие товары">
+                                <span class="cat-label">Другие товары</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <label>Количество платежей:</label>
+                <div class="range-container">
+                    <div class="range-wrapper">
+                        <input type="range" id="term" min="4" max="12" value="6">
+                    </div>
+                    <div class="range-labels">
+                        <span>4</span>
+                        <span>6</span>
+                        <span>8</span>
+                        <span>10</span>
+                        <span>12</span>
+                    </div>
+                    <div class="term-value" id="termLabel"></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <label>Первоначальный взнос:</label>
+                <div class="input-wrapper">
+                    <input type="text" id="down" placeholder="0 ₽">
+                </div>
+                <div class="min-down-hint" id="minDown">
+                    <svg fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                    </svg>
+                    <span id="minDownText">Минимальный взнос</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="results">
+            <div class="result-row">
+                <span class="result-label">Первоначальный взнос:</span>
+                <span class="result-value" id="downValue">0 ₽</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Остаток:</span>
+                <span class="result-value" id="restValue">0 ₽</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">Ежемесячный платёж:</span>
+                <span class="result-value" id="monthlyValue">0 ₽</span>
+            </div>
+            <div class="result-total">
+                <span class="result-label">Общая сумма:</span>
+                <span class="result-value" id="totalValue">0 ₽</span>
+            </div>
+        </div>
+
+        <div class="wa-button-wrapper">
+            <a href="https://wa.me/79298533232" target="_blank" class="wa-button" id="waBtn">
+                <img src="whatsapp-icon.png" alt="WhatsApp">
+                <span id="waBtnText">Отправить расчёт</span>
+            </a>
+            <div class="wa-tooltip">
+                Отправить результаты расчёта менеджеру для оформления
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ===== iOS SAFE CLICK SOUND ===== */
+        let audioCtx;
+        let clickBuffer;
+
+        async function initIOSAudio() {
+            if (audioCtx) return;
+
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            try {
+                const res = await fetch('click.mp3');
+                const arr = await res.arrayBuffer();
+                clickBuffer = await audioCtx.decodeAudioData(arr);
+            } catch (e) {
+                console.log('Audio file not found, using fallback');
+            }
+        }
+
+        document.addEventListener('touchstart', initIOSAudio, { once: true });
+        document.addEventListener('mousedown', initIOSAudio, { once: true });
+
+        function playClick() {
+            if (!audioCtx) return;
+
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            if (!clickBuffer) {
+                playFallbackClick();
+                return;
+            }
+
+            const src = audioCtx.createBufferSource();
+            src.buffer = clickBuffer;
+            src.connect(audioCtx.destination);
+            src.start(0);
+        }
+
+        function playFallbackClick() {
+            if (!audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'square';
+            osc.frequency.value = 900;
+            gain.gain.value = 0.06;
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.025);
+        }
+
+        function visualHaptic(el) {
+            if (!el) return;
+            el.classList.remove('haptic');
+            void el.offsetWidth;
+            el.classList.add('haptic');
+        }
+
+        function feedback(el = null) {
+            if (!audioCtx) {
+                initIOSAudio();
+            }
+            playClick();
+            if (el) visualHaptic(el);
+        }
+
+        /* TABLES - НЕ ТРОГАЕМ */
+        const phonePrice = { 4: 0.15, 5: .18, 6: .25, 7: .2917, 8: .3333, 9: .375, 10: .4167, 11: .4583, 12: .5 };
+        const phoneRest = { 4: .2, 5: .24, 6: .3158, 7: .357, 8: .4, 9: .4426, 10: .4855, 11: .5285, 12: .5714 };
+        const phonePriceAlt = { 4: 0.15, 5: 0.18, 6: 0.21, 7: 0.2442, 8: 0.2783, 9: 0.3125, 10: 0.3467, 11: 0.3808, 12: 0.415 };
+        const phoneRestAlt = { 4: 0.2, 5: 0.233333333, 6: 0.28, 7: 0.3112, 8: 0.3556, 9: 0.4, 10: 0.444533333, 11: 0.488933333, 12: 0.533333333 };
+
+        const allPrice = { 4: 0.1417, 5: 0.1758, 6: 0.21, 7: 0.2442, 8: 0.2783, 9: 0.3125, 10: 0.3467, 11: 0.3808, 12: 0.415 };
+        const allRest = { 4: 0.188986667, 5: 0.2344, 6: 0.28, 7: 0.3256, 8: 0.371066667, 9: 0.416666667, 10: 0.462266667, 11: 0.507733333, 12: 0.553333333 };
+
+        const allPrice150t = { 4: 0.1233, 5: 0.1517, 6: 0.18, 7: 0.2083, 8: 0.2367, 9: 0.265, 10: 0.2933, 11: 0.3217, 12: 0.35 };
+        const allRest150t = { 4: 0.1644, 5: 0.202266667, 6: 0.28, 7: 0.277733333, 8: 0.3156, 9: 0.353333333, 10: 0.391066667, 11: 0.428933333, 12: 0.466666667 };
+
+        let phoneMode = 'minDown';
+        let category = 2, lastTerm = 6, userTouchedDown = false;
+        let lastResult = {};
+
+        /* helpers */
+        const digits = v => v.replace(/\D/g, '');
+        const bank = v => (Math.ceil(v / 100) * 100).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽';
+
+        /* DOM */
+        const priceInput = document.getElementById('price');
+        const downInput = document.getElementById('down');
+        const termInput = document.getElementById('term');
+        const termLabel = document.getElementById('termLabel');
+        const downValue = document.getElementById('downValue');
+        const restValue = document.getElementById('restValue');
+        const monthlyValue = document.getElementById('monthlyValue');
+        const totalValue = document.getElementById('totalValue');
+        const minDownDiv = document.getElementById('minDown');
+        const minDownText = document.getElementById('minDownText');
+
+        /* money input */
+        function bindMoneyInput(el, isDown = false) {
+            let original = '', editing = false;
+            el.addEventListener('focus', () => { 
+                original = el.value; 
+                editing = false; 
+                el.value = digits(el.value);
+            });
+            el.addEventListener('keydown', e => {
+                if (e.key === 'Escape') { el.value = original; el.blur() }
+                if (e.key === 'Enter') el.blur();
+            });
+            el.addEventListener('input', () => {
+                editing = true; 
+                el.value = digits(el.value);
+                if (isDown) userTouchedDown = true;
+            });
+            el.addEventListener('blur', () => {
+                if (!editing) { el.value = original; return }
+                el.value = bank(Number(el.value) || 0); 
+                calc();
+            });
+        }
+        bindMoneyInput(priceInput);
+        bindMoneyInput(downInput, true);
+
+        /* CALC - ЛОГИКА НЕ МЕНЯЕТСЯ */
+        function calc() {
+            const price = Number(digits(priceInput.value));
+            const downRaw = Number(digits(downInput.value));
+            const term = lastTerm, N = term - 1;
+            let down = downRaw;
+
+            let p, r;
+
+            if (category === 1) {
+                if (phoneMode === 'minDown') {
+                    p = phonePrice;
+                    r = phoneRest;
+                } else {
+                    p = phonePriceAlt;
+                    r = phoneRestAlt;
+                }
+            } else {
+                if (price <= 150000) {
+                    p = allPrice;
+                    r = allRest;
+                } else {
+                    p = allPrice150t;
+                    r = allRest150t;
+                }
+            }
+
+            let minDown;
+
+            if (category === 1) {
+                if (phoneMode === 'minDown') {
+                    minDown = Math.ceil(((price + 1000) * (p[term] + 1) / term) / 100) * 100;
+                } else {
+                    minDown = Math.ceil((price * 0.3) / 100) * 100;
+                }
+            } else {
+                minDown = Math.ceil((price * 0.25) / 100) * 100;
+            }
+
+            minDownText.innerText = 'Минимум: ' + bank(minDown);
+
+            if (!userTouchedDown) {
+                down = minDown;
+                downInput.value = bank(minDown);
+            }
+
+            let totalCost;
+            if (down === minDown) {
+                totalCost = (price + 1000) * (p[term] + 1);
+            } else {
+                totalCost = (price + 1000 - down) * (r[term] + 1) + down;
+            }
+
+            const monthly = Math.ceil(((totalCost - down) / N) / 100) * 100;
+            const total = monthly * N + down;
+
+            lastResult = {
+                price: price,
+                down: down,
+                rest: total - down,
+                monthly: monthly,
+                total: total
+            };
+
+            function paymentWord(n) {
+                n = Math.abs(n) % 100;
+                const n1 = n % 10;
+                if (n > 10 && n < 20) return 'платежей';
+                if (n1 === 1) return 'платёж';
+                if (n1 >= 2 && n1 <= 4) return 'платежа';
+                return 'платежей';
+            }
+
+            termLabel.innerText = term + ' ' + paymentWord(term);
+            downValue.innerText = bank(down);
+            restValue.innerText = bank(total - down);
+            monthlyValue.innerText = bank(monthly);
+            totalValue.innerText = bank(total);
+            
+            // Update monthly payment label with term count
+            const monthlyLabel = document.querySelector('.result-row:nth-child(3) .result-label');
+            if (monthlyLabel) {
+                monthlyLabel.innerHTML = `Ежемесячный платёж <span style="font-weight: 400; opacity: 0.8;">- ${N} пл.</span>:`;
+            }
+        }
+
+        function buildWhatsAppText() {
+            let categoryText = category === 1 ? 'Телефоны' : 'Другие товары';
+
+            if (category === 1) {
+                categoryText += phoneMode === 'minDown'
+                    ? ' (Минимальный взнос)'
+                    : ' (Минимальная наценка)';
+            }
+
+            return `Здравствуйте!
+Интересует рассрочка:
+
+Категория товара: ${categoryText}
+Стоимость товара: ${bank(lastResult.price)}
+Платежей: ${lastTerm}
+
+Взнос: ${bank(lastResult.down)}
+Остаток: ${bank(lastResult.rest)}
+Ежемесячный платёж: ${bank(lastResult.monthly)}
+Общая сумма: ${bank(lastResult.total)}`.trim();
+        }
+
+        /* click min down */
+        minDownDiv.addEventListener('click', () => {
+            feedback(minDownDiv);
+            const v = digits(minDownText.innerText);
+            if (!v) return;
+            userTouchedDown = true;
+            downInput.value = bank(Number(v));
+            downInput.focus(); 
+            downInput.blur();
+            calc();
+        });
+
+        /* SLIDER */
+        function updateSlider() {
+            const min = +termInput.min;
+            const max = +termInput.max;
+            const val = +termInput.value;
+            const percent = (val - min) / (max - min);
+
+            termInput.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${percent * 100}%, var(--border) ${percent * 100}%, var(--border) 100%)`;
+        }
+
+        termInput.addEventListener('input', () => {
+            lastTerm = +termInput.value;
+            userTouchedDown = false;
+            updateSlider();
+            calc();
+        });
+
+        /* category */
+        document.querySelectorAll('.cat').forEach(c => {
+            c.onclick = () => {
+                feedback(c);
+                document.querySelectorAll('.cat').forEach(x => x.classList.remove('active'));
+                c.classList.add('active');
+
+                category = +c.dataset.cat;
+                userTouchedDown = false;
+
+                const modes = document.getElementById('phoneModes');
+                if (category === 1) {
+                    modes.classList.remove('hidden');
+                } else {
+                    modes.classList.add('hidden');
+                }
+
+                calc();
+            };
+        });
+
+        document.querySelectorAll('.phone-mode').forEach(btn => {
+            btn.addEventListener('click', () => {
+                feedback(btn);
+                document.querySelectorAll('.phone-mode').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                phoneMode = btn.dataset.mode;
+                userTouchedDown = false;
+                calc();
+            });
+        });
+
+        /* WhatsApp Button */
+        const waBtn = document.getElementById('waBtn');
+        const waBtnText = document.getElementById('waBtnText');
+
+        if (waBtn) {
+            waBtn.addEventListener('click', e => {
+                feedback(waBtn);
+                const text = buildWhatsAppText();
+                const encoded = encodeURIComponent(text);
+                waBtn.href = `https://wa.me/79298533232?text=${encoded}`;
+            });
+        }
+
+        /* init */
+        priceInput.value = bank(75000);
+        updateSlider();
+        calc();
+
+        /* Theme Toggle */
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+
+        // Check for saved theme preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            feedback(themeToggle);
+            const theme = html.getAttribute('data-theme');
+            const newTheme = theme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    </script>
+</body>
+
+</html>
