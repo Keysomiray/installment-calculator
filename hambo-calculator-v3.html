@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HamBo — Калькулятор рассрочки</title>
+    <link rel="icon" href="favicon.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #00C896;
+            --accent-dark: #00A67E;
+            --accent-glow: rgba(0, 200, 150, 0.2);
+            --accent-subtle: rgba(0, 200, 150, 0.08);
+            --bg: #FAFCFB;
+            --bg-card: #FFFFFF;
+            --bg-input: #F5F7F6;
+            --text: #0D1B16;
+            --text-secondary: #5A6B64;
+            --text-muted: #8A9A94;
+            --border: #E8EDEB;
+            --shadow: 0 2px 8px rgba(13, 27, 22, 0.04), 0 8px 24px rgba(13, 27, 22, 0.06);
+            --radius: 14px;
+            --radius-sm: 10px;
+            --radius-xs: 8px;
+        }
+
+        [data-theme="dark"] {
+            --bg: #0A0F0D;
+            --bg-card: #141A17;
+            --bg-input: #1A211E;
+            --text: #F0F5F3;
+            --text-secondary: #A8B5B0;
+            --text-muted: #6B7A74;
+            --border: #242D29;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.3);
+            --accent-glow: rgba(0, 200, 150, 0.15);
+            --accent-subtle: rgba(0, 200, 150, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Onest', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100dvh;
+            padding: 12px;
+            padding-bottom: env(safe-area-inset-bottom, 12px);
+            transition: background 0.4s ease, color 0.3s ease;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse 80% 50% at 20% 0%, var(--accent-subtle) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 80% 100%, var(--accent-subtle) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header Controls */
+        .header-controls {
+            position: fixed;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            gap: 6px;
+            z-index: 100;
+        }
+
+        .icon-btn {
+            width: 38px;
+            height: 38px;
+            border: none;
+            background: var(--bg-card);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .icon-btn:active { transform: scale(0.92); }
+        .icon-btn svg { width: 18px; height: 18px; }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 4px 0 16px;
+        }
+
+        .header img {
+            width: 80px;
+            filter: drop-shadow(0 4px 12px rgba(0, 200, 150, 0.15));
+        }
+
+        [data-theme="dark"] .header img {
+            content: url('logo-dark.png');
+        }
+
+        .header h1 {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--accent-dark);
+            margin-top: 8px;
+            letter-spacing: -0.3px;
+        }
+
+        [data-theme="dark"] .header h1 {
+            color: var(--accent);
+        }
+
+        /* Card */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .section {
+            margin-bottom: 16px;
+        }
+
+        .section:last-child {
+            margin-bottom: 0;
+        }
+
+        .label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            margin-bottom: 8px;
+        }
+
+        /* Input */
+        .input-field input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 600;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .input-field input:focus {
+            border-color: var(--accent);
+            background: var(--bg-card);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .input-field input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Category Carousel */
+        .category-carousel {
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius-sm);
+            margin-top: 6px;
+        }
+
+        .category-track {
+            display: flex;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            touch-action: pan-y;
+            will-change: transform;
+        }
+
+        .category-track.dragging {
+            transition: none;
+        }
+
+        .category-slide {
+            min-width: 100%;
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--border);
+            background: var(--bg-input);
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+            transform: scale(0.95);
+            opacity: 0.6;
+        }
+
+        .category-slide.active {
+            transform: scale(1);
+            opacity: 1;
+            border-color: var(--accent);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+        }
+
+        .category-slide img {
+            width: 36px;
+            height: 36px;
+            transition: all 0.5s ease;
+            filter: grayscale(0.5) brightness(0.8);
+            transform: scale(0.9);
+        }
+
+        .category-slide.active img {
+            filter: brightness(1.2) grayscale(0);
+            transform: scale(1);
+        }
+
+        .category-label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            transition: all 0.5s ease;
+            opacity: 0.6;
+        }
+
+        .category-slide.active .category-label {
+            color: white;
+            opacity: 1;
+        }
+
+        .category-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .category-indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--border);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+
+        .category-indicator.active {
+            background: var(--accent);
+            width: 20px;
+            border-radius: 3px;
+        }
+
+        .swipe-hint {
+            text-align: center;
+            margin-top: 6px;
+            font-size: 10px;
+            color: var(--text-muted);
+            font-weight: 500;
+            opacity: 0.7;
+        }
+
+        @media (min-width: 641px) {
+            .swipe-hint { display: none; }
+        }
+
+        /* Sub-options */
+        .sub-options {
+            display: none;
+            gap: 6px;
+            margin-top: 10px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .sub-options.visible {
+            display: flex;
+        }
+
+        .sub-options.grid-3 {
+            display: none;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .sub-options.grid-3.visible {
+            display: grid;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .sub-btn {
+            flex: 1;
+            padding: 8px 10px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-xs);
+            background: var(--bg-input);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .sub-btn:active { transform: scale(0.96); }
+
+        .sub-btn.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+        }
+
+        .term-btn {
+            padding: 10px 6px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-xs);
+            background: var(--bg-input);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .term-btn .num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .term-btn .txt {
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .term-btn:active { transform: scale(0.96); }
+
+        .term-btn.active {
+            border-color: var(--accent);
+            background: var(--accent);
+        }
+
+        .term-btn.active .num,
+        .term-btn.active .txt {
+            color: white;
+        }
+
+        /* Slider Section */
+        .slider-section {
+            display: none;
+        }
+
+        .slider-section.visible {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 5px;
+            background: var(--border);
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 12px 0 10px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: grab;
+            box-shadow: 0 2px 10px var(--accent-glow);
+            transition: transform 0.15s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.15);
+            cursor: grabbing;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: var(--accent);
+            border-radius: 50%;
+            border: none;
+            cursor: grab;
+            box-shadow: 0 2px 10px var(--accent-glow);
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .slider-labels span {
+            cursor: pointer;
+            padding: 3px 6px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .slider-labels span:active {
+            background: var(--accent-subtle);
+            color: var(--accent);
+        }
+
+        .term-display {
+            text-align: center;
+            padding: 8px;
+            background: var(--accent-subtle);
+            border-radius: var(--radius-xs);
+            margin-top: 10px;
+        }
+
+        .term-display span {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 14px;
+        }
+
+        /* Down payment hint */
+        .min-hint {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xs);
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .min-hint:active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .min-hint svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        /* Results Card */
+        .results-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            padding: 14px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        /* Monthly Payment Hero - Compact */
+        .monthly-hero {
+            text-align: center;
+            padding: 14px 12px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+        }
+
+        .monthly-hero .label {
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(255,255,255,0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 4px;
+        }
+
+        .monthly-hero .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            line-height: 1;
+        }
+
+        .monthly-hero .payments-count {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.7);
+            margin-top: 4px;
+        }
+
+        /* Results Grid */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .result-item {
+            padding: 10px;
+            background: var(--bg-input);
+            border-radius: var(--radius-sm);
+            text-align: center;
+        }
+
+        .result-item .label {
+            font-size: 10px;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.2px;
+        }
+
+        .result-item .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* Total */
+        .result-total {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: var(--bg-input);
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--border);
+        }
+
+        .result-total .label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-bottom: 0;
+        }
+
+        .result-total .value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        /* WhatsApp Button */
+        .wa-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+            border: none;
+            border-radius: var(--radius);
+            color: white;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+        }
+
+        .wa-btn:active { transform: scale(0.98); }
+        .wa-btn img { width: 22px; height: 22px; }
+
+        .wa-hint {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        /* Icon swaps */
+        .icon-btn .sun { display: none; }
+        .icon-btn .moon { display: block; }
+        [data-theme="dark"] .icon-btn .sun { display: block; }
+        [data-theme="dark"] .icon-btn .moon { display: none; }
+
+        .sound-btn .on { display: block; }
+        .sound-btn .off { display: none; }
+        .sound-btn.muted .on { display: none; }
+        .sound-btn.muted .off { display: block; }
+        .sound-btn.muted { opacity: 0.5; }
+
+        /* Desktop */
+        @media (min-width: 640px) {
+            body { padding: 24px; }
+            .container { max-width: 420px; }
+            .card, .results-card { padding: 20px; }
+            .monthly-hero { padding: 18px 16px; }
+            .monthly-hero .value { font-size: 32px; }
+        }
+
+        @media (min-width: 1024px) {
+            .icon-btn:hover { background: var(--bg-input); }
+            .sub-btn:hover:not(.active) { border-color: var(--text-muted); }
+            .term-btn:hover:not(.active) { border-color: var(--text-muted); }
+            .min-hint:hover { border-color: var(--accent); color: var(--accent); }
+            .wa-btn:hover { box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4); }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card { animation: fadeIn 0.4s ease backwards; }
+        .results-card { animation: fadeIn 0.4s ease 0.1s backwards; }
+        .wa-btn { animation: fadeIn 0.4s ease 0.15s backwards; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.96); }
+        }
+
+        .haptic { animation: pulse 0.12s ease; }
+
+        @media (max-width: 360px) {
+            .monthly-hero .value { font-size: 24px; }
+            .result-item .value { font-size: 14px; }
+            .result-total .value { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-controls">
+        <button class="icon-btn sound-btn" id="soundToggle" aria-label="Звук">
+            <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            </svg>
+            <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+                <line x1="23" y1="9" x2="17" y2="15"/>
+                <line x1="17" y1="9" x2="23" y2="15"/>
+            </svg>
+        </button>
+        <button class="icon-btn" id="themeToggle" aria-label="Тема">
+            <svg class="moon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+            <svg class="sun" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="5"/>
+                <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </button>
+    </div>
+
+    <div class="container">
+        <header class="header">
+            <img src="logo.png" alt="HamBo">
+            <h1>Калькулятор рассрочки</h1>
+        </header>
+
+        <div class="card">
+            <div class="section">
+                <div class="label">Стоимость товара</div>
+                <div class="input-field">
+                    <input type="text" id="price" placeholder="0 ₽" inputmode="numeric">
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="label">Категория товара</div>
+                <div class="category-carousel">
+                    <div class="category-track" id="categoryTrack">
+                        <div class="category-slide" data-cat="1">
+                            <img src="icon-phone.png" alt="Телефоны" class="cat-icon">
+                            <span class="category-label">Телефоны</span>
+                        </div>
+                        <div class="category-slide" data-cat="3">
+                            <img src="icon-car.png" alt="Автомобили" class="cat-icon">
+                            <span class="category-label">Автомобили</span>
+                        </div>
+                        <div class="category-slide active" data-cat="2">
+                            <img src="icon-box.png" alt="Другие товары" class="cat-icon">
+                            <span class="category-label">Другие товары</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="category-indicators" id="categoryIndicators">
+                    <div class="category-indicator" data-index="0"></div>
+                    <div class="category-indicator" data-index="1"></div>
+                    <div class="category-indicator active" data-index="2"></div>
+                </div>
+                <div class="swipe-hint">← Свайп или двойной тап для смены →</div>
+
+                <div class="sub-options" id="phoneModes">
+                    <button class="sub-btn active" data-mode="minDown">Минимальный взнос</button>
+                    <button class="sub-btn" data-mode="minMarkup">Минимальная наценка</button>
+                </div>
+
+                <div class="sub-options grid-3" id="carTerms">
+                    <button class="term-btn active" data-term="12">
+                        <div class="num">12</div>
+                        <div class="txt">платежей</div>
+                    </button>
+                    <button class="term-btn" data-term="18">
+                        <div class="num">18</div>
+                        <div class="txt">платежей</div>
+                    </button>
+                    <button class="term-btn" data-term="24">
+                        <div class="num">24</div>
+                        <div class="txt">платежа</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="section slider-section visible" id="termSection">
+                <div class="label">Количество платежей</div>
+                <div class="slider-wrapper">
+                    <input type="range" id="term" min="3" max="13" value="6">
+                    <div class="slider-labels" id="rangeLabels">
+                        <span data-val="3">3</span>
+                        <span data-val="5">5</span>
+                        <span data-val="8">8</span>
+                        <span data-val="11">11</span>
+                        <span data-val="13">13</span>
+                    </div>
+                </div>
+                <div class="term-display">
+                    <span id="termLabel">6 платежей</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="label">Первоначальный взнос</div>
+                <div class="input-field">
+                    <input type="text" id="down" placeholder="0 ₽" inputmode="numeric">
+                </div>
+                <div class="min-hint" id="minDown">
+                    <svg fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                    </svg>
+                    <span id="minDownText">Минимум: 0 ₽</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-card">
+            <div class="monthly-hero">
+                <div class="label">Ежемесячный платёж</div>
+                <div class="value" id="monthlyValue">0 ₽</div>
+                <div class="payments-count">× <span id="paymentsCount">0</span> платежей</div>
+            </div>
+
+            <div class="results-grid">
+                <div class="result-item">
+                    <div class="label">Первый взнос</div>
+                    <div class="value" id="downValue">0 ₽</div>
+                </div>
+                <div class="result-item">
+                    <div class="label">Остаток</div>
+                    <div class="value" id="restValue">0 ₽</div>
+                </div>
+            </div>
+
+            <div class="result-total">
+                <span class="label">Итого</span>
+                <span class="value" id="totalValue">0 ₽</span>
+            </div>
+        </div>
+
+        <a href="#" target="_blank" class="wa-btn" id="waBtn">
+            <img src="whatsapp-icon.png" alt="WhatsApp">
+            <span>Отправить в WhatsApp</span>
+        </a>
+        <div class="wa-hint">Отправьте расчёт менеджеру для оформления</div>
+    </div>
+
+    <script>
+        // Audio
+        let audioCtx;
+        let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+
+        async function initAudio() {
+            if (audioCtx) return;
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        document.addEventListener('touchstart', initAudio, { once: true });
+        document.addEventListener('mousedown', initAudio, { once: true });
+
+        function playSound(type = 'click') {
+            if (!soundEnabled || !audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            const profiles = {
+                click: { freq: 1200, duration: 0.04, volume: 0.12 },
+                slider: { freq: 800, duration: 0.03, volume: 0.06 },
+                success: { freq: 1400, duration: 0.08, volume: 0.1 },
+                swipe: { freq: 900, duration: 0.06, volume: 0.1 }
+            };
+
+            const p = profiles[type] || profiles.click;
+            osc.type = 'sine';
+            osc.frequency.value = p.freq;
+
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(p.volume, now + 0.001);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + p.duration);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + p.duration);
+        }
+
+        function playSliderSound(value) {
+            if (!soundEnabled || !audioCtx) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            const freq = 550 + ((value - 3) / 10) * 600;
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+
+            gain.gain.setValueAtTime(0, now);
+            gain.gain.linearRampToValueAtTime(0.05, now + 0.001);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.03);
+        }
+
+        function haptic(el) {
+            if (!el) return;
+            el.classList.remove('haptic');
+            void el.offsetWidth;
+            el.classList.add('haptic');
+        }
+
+        function feedback(el, soundType = 'click') {
+            if (!audioCtx) initAudio();
+            playSound(soundType);
+            if (el) haptic(el);
+        }
+
+        // Tables
+        const phonePrice = { 4: 0.15, 5: .18, 6: .25, 7: .2917, 8: .3333, 9: .375, 10: .4167, 11: .4583, 12: .5 };
+        const phoneRest = { 4: .2, 5: .24, 6: .3158, 7: .357, 8: .4, 9: .4426, 10: .4855, 11: .5285, 12: .5714 };
+        const phonePriceAlt = { 4: 0.15, 5: 0.18, 6: 0.21, 7: 0.2442, 8: 0.2783, 9: 0.3125, 10: 0.3467, 11: 0.3808, 12: 0.415 };
+        const phoneRestAlt = { 4: 0.2, 5: 0.233333333, 6: 0.28, 7: 0.3112, 8: 0.3556, 9: 0.4, 10: 0.444533333, 11: 0.488933333, 12: 0.533333333 };
+
+        const allPrice = { 3: 0.1075, 4: 0.1417, 5: 0.1758, 6: 0.21, 7: 0.2442, 8: 0.2783, 9: 0.3125, 10: 0.3467, 11: 0.3808, 12: 0.415, 13: 0.4492 };
+        const allRest = { 3: 0.1434, 4: 0.188986667, 5: 0.2344, 6: 0.28, 7: 0.3256, 8: 0.371066667, 9: 0.416666667, 10: 0.462266667, 11: 0.507733333, 12: 0.553333333, 13: 0.5992 };
+        const allPrice150t = { 3: 0.095, 4: 0.1233, 5: 0.1517, 6: 0.18, 7: 0.2083, 8: 0.2367, 9: 0.265, 10: 0.2933, 11: 0.3217, 12: 0.35, 13: 0.3783 };
+        const allRest150t = { 3: 0.1266, 4: 0.1644, 5: 0.202266667, 6: 0.24, 7: 0.277733333, 8: 0.3156, 9: 0.353333333, 10: 0.391066667, 11: 0.428933333, 12: 0.466666667, 13: 0.5044 };
+
+        const carPriceLow = { 12: 0.30, 18: 0.45, 24: 0.60 };
+        const carPriceHigh = { 12: 0.25, 18: 0.375, 24: 0.50 };
+        const carRestLow = { 12: 0.40, 18: 0.60, 24: 0.80 };
+        const carRestHigh = { 12: 0.333333333, 18: 0.50, 24: 0.666666667 };
+
+        // State
+        let category = parseInt(localStorage.getItem('category')) || 2;
+        let phoneMode = localStorage.getItem('phoneMode') || 'minDown';
+        let carTerm = parseInt(localStorage.getItem('carTerm')) || 12;
+        let lastTerm = parseInt(localStorage.getItem('lastTerm')) || 6;
+        let userTouchedDown = localStorage.getItem('userTouchedDown') === 'true';
+        let lastResult = {};
+
+        const catToIndex = { 1: 0, 3: 1, 2: 2 };
+        const indexToCat = { 0: 1, 1: 3, 2: 2 };
+        let currentCategoryIndex = catToIndex[category] || 2;
+
+        // DOM
+        const html = document.documentElement;
+        const priceInput = document.getElementById('price');
+        const downInput = document.getElementById('down');
+        const termInput = document.getElementById('term');
+        const termLabel = document.getElementById('termLabel');
+        const termSection = document.getElementById('termSection');
+        const phoneModes = document.getElementById('phoneModes');
+        const carTerms = document.getElementById('carTerms');
+        const minDownDiv = document.getElementById('minDown');
+        const minDownText = document.getElementById('minDownText');
+        const rangeLabels = document.getElementById('rangeLabels');
+        const downValue = document.getElementById('downValue');
+        const restValue = document.getElementById('restValue');
+        const monthlyValue = document.getElementById('monthlyValue');
+        const paymentsCount = document.getElementById('paymentsCount');
+        const totalValue = document.getElementById('totalValue');
+        const waBtn = document.getElementById('waBtn');
+        const themeToggle = document.getElementById('themeToggle');
+        const soundToggle = document.getElementById('soundToggle');
+        const categoryTrack = document.getElementById('categoryTrack');
+        const slides = document.querySelectorAll('.category-slide');
+        const indicators = document.querySelectorAll('.category-indicator');
+
+        function bank(n) {
+            return Math.round(n).toLocaleString('ru-RU') + ' ₽';
+        }
+
+        function digits(str) {
+            return str.replace(/\D/g, '');
+        }
+
+        // Carousel
+        let startX = 0;
+        let currentX = 0;
+        let isDragging = false;
+        let lastTapTime = 0;
+
+        function updateCategoryCarousel(animate = true) {
+            if (!animate) categoryTrack.classList.add('dragging');
+            categoryTrack.style.transform = `translateX(-${currentCategoryIndex * 100}%)`;
+            if (!animate) {
+                setTimeout(() => categoryTrack.classList.remove('dragging'), 50);
+            }
+
+            slides.forEach((slide, i) => {
+                slide.classList.toggle('active', i === currentCategoryIndex);
+            });
+
+            indicators.forEach((ind, i) => {
+                ind.classList.toggle('active', i === currentCategoryIndex);
+            });
+
+            category = indexToCat[currentCategoryIndex];
+            localStorage.setItem('category', category);
+        }
+
+        function updateCategoryIcons() {
+            const isDark = html.getAttribute('data-theme') === 'dark';
+            document.querySelectorAll('.cat-icon').forEach(icon => {
+                const src = icon.getAttribute('src');
+                if (isDark && !src.includes('-dark')) {
+                    icon.setAttribute('src', src.replace('.png', '-dark.png'));
+                } else if (!isDark && src.includes('-dark')) {
+                    icon.setAttribute('src', src.replace('-dark.png', '.png'));
+                }
+            });
+        }
+
+        categoryTrack.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+            categoryTrack.classList.add('dragging');
+        }, { passive: true });
+
+        categoryTrack.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            currentX = e.touches[0].clientX;
+            const diff = currentX - startX;
+            const offset = -currentCategoryIndex * 100 + (diff / categoryTrack.offsetWidth) * 100;
+            categoryTrack.style.transform = `translateX(${offset}%)`;
+        }, { passive: true });
+
+        categoryTrack.addEventListener('touchend', () => {
+            if (!isDragging) return;
+            isDragging = false;
+            categoryTrack.classList.remove('dragging');
+
+            const diff = currentX - startX;
+            const threshold = categoryTrack.offsetWidth * 0.2;
+
+            if (Math.abs(diff) > threshold) {
+                if (diff > 0 && currentCategoryIndex > 0) {
+                    currentCategoryIndex--;
+                    playSound('swipe');
+                } else if (diff < 0 && currentCategoryIndex < slides.length - 1) {
+                    currentCategoryIndex++;
+                    playSound('swipe');
+                }
+            }
+
+            userTouchedDown = false;
+            localStorage.setItem('userTouchedDown', 'false');
+            updateCategoryCarousel();
+            updateUI();
+            calc();
+        });
+
+        slides.forEach(slide => {
+            slide.addEventListener('click', () => {
+                const now = Date.now();
+                if (now - lastTapTime < 300) {
+                    const nextIndex = (currentCategoryIndex + 1) % slides.length;
+                    currentCategoryIndex = nextIndex;
+                    playSound('swipe');
+                    userTouchedDown = false;
+                    localStorage.setItem('userTouchedDown', 'false');
+                    updateCategoryCarousel();
+                    updateUI();
+                    calc();
+                }
+                lastTapTime = now;
+            });
+        });
+
+        indicators.forEach((ind, i) => {
+            ind.addEventListener('click', () => {
+                feedback(ind);
+                currentCategoryIndex = i;
+                userTouchedDown = false;
+                localStorage.setItem('userTouchedDown', 'false');
+                updateCategoryCarousel();
+                updateUI();
+                calc();
+            });
+        });
+
+        [priceInput, downInput].forEach(input => {
+            input.addEventListener('input', () => {
+                const raw = digits(input.value);
+                if (raw) {
+                    input.value = bank(Number(raw));
+                    localStorage.setItem(input.id, raw);
+                    if (input === downInput) {
+                        userTouchedDown = true;
+                        localStorage.setItem('userTouchedDown', 'true');
+                    }
+                } else {
+                    input.value = '';
+                }
+                calc();
+            });
+
+            input.addEventListener('focus', () => {
+                const raw = digits(input.value);
+                input.value = raw || '';
+            });
+
+            input.addEventListener('blur', () => {
+                const raw = digits(input.value);
+                input.value = raw ? bank(Number(raw)) : '';
+            });
+        });
+
+        document.querySelectorAll('#phoneModes .sub-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                feedback(btn);
+                document.querySelectorAll('#phoneModes .sub-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                phoneMode = btn.dataset.mode;
+                localStorage.setItem('phoneMode', phoneMode);
+                userTouchedDown = false;
+                localStorage.setItem('userTouchedDown', 'false');
+                calc();
+            });
+        });
+
+        document.querySelectorAll('#carTerms .term-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                feedback(btn);
+                document.querySelectorAll('#carTerms .term-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                carTerm = parseInt(btn.dataset.term);
+                localStorage.setItem('carTerm', carTerm);
+                userTouchedDown = false;
+                localStorage.setItem('userTouchedDown', 'false');
+                calc();
+            });
+        });
+
+        termInput.addEventListener('input', () => {
+            const oldTerm = lastTerm;
+            lastTerm = +termInput.value;
+
+            if (category === 1) {
+                const wasSpecial = (oldTerm === 4 || oldTerm === 5);
+                const isSpecial = (lastTerm === 4 || lastTerm === 5);
+                if (wasSpecial !== isSpecial) {
+                    userTouchedDown = false;
+                    localStorage.setItem('userTouchedDown', 'false');
+                }
+            }
+
+            localStorage.setItem('lastTerm', lastTerm);
+            updateSlider();
+            updatePhoneModesVisibility();
+            calc();
+            playSliderSound(lastTerm);
+        });
+
+        function bindRangeLabels() {
+            rangeLabels.querySelectorAll('span').forEach(span => {
+                span.addEventListener('click', () => {
+                    feedback(span);
+                    termInput.value = span.dataset.val;
+                    lastTerm = +span.dataset.val;
+                    localStorage.setItem('lastTerm', lastTerm);
+                    updateSlider();
+                    updatePhoneModesVisibility();
+                    calc();
+                });
+            });
+        }
+        bindRangeLabels();
+
+        minDownDiv.addEventListener('click', () => {
+            feedback(minDownDiv);
+            const v = digits(minDownText.innerText);
+            if (!v) return;
+            userTouchedDown = true;
+            localStorage.setItem('userTouchedDown', 'true');
+            downInput.value = bank(Number(v));
+            localStorage.setItem('down', v);
+            calc();
+        });
+
+        waBtn.addEventListener('click', () => {
+            feedback(waBtn, 'success');
+            const text = buildWhatsAppText();
+            waBtn.href = `https://wa.me/79298533232?text=${encodeURIComponent(text)}`;
+        });
+
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', currentTheme);
+
+        themeToggle.addEventListener('click', () => {
+            feedback(themeToggle);
+            const theme = html.getAttribute('data-theme');
+            const newTheme = theme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateCategoryIcons();
+        });
+
+        if (!soundEnabled) soundToggle.classList.add('muted');
+
+        soundToggle.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            localStorage.setItem('soundEnabled', soundEnabled);
+            if (soundEnabled) {
+                soundToggle.classList.remove('muted');
+                playSound('click');
+            } else {
+                soundToggle.classList.add('muted');
+            }
+            haptic(soundToggle);
+        });
+
+        function updateUI() {
+            if (category === 1) {
+                phoneModes.classList.add('visible');
+                updatePhoneModesVisibility();
+            } else {
+                phoneModes.classList.remove('visible');
+            }
+
+            if (category === 3) {
+                carTerms.classList.add('visible');
+            } else {
+                carTerms.classList.remove('visible');
+            }
+
+            if (category === 3) {
+                termSection.classList.remove('visible');
+            } else {
+                termSection.classList.add('visible');
+                updateRangeLabels();
+            }
+        }
+
+        function updatePhoneModesVisibility() {
+            if (category !== 1) return;
+
+            const minDownBtn = document.querySelector('#phoneModes .sub-btn[data-mode="minDown"]');
+            const minMarkupBtn = document.querySelector('#phoneModes .sub-btn[data-mode="minMarkup"]');
+
+            if (lastTerm === 4 || lastTerm === 5) {
+                minDownBtn.style.display = 'none';
+                minMarkupBtn.style.display = 'block';
+                phoneModes.style.gridTemplateColumns = '1fr';
+                if (phoneMode === 'minDown') {
+                    phoneMode = 'minMarkup';
+                    localStorage.setItem('phoneMode', phoneMode);
+                    document.querySelectorAll('#phoneModes .sub-btn').forEach(b => b.classList.remove('active'));
+                    minMarkupBtn.classList.add('active');
+                }
+            } else {
+                minDownBtn.style.display = 'block';
+                minMarkupBtn.style.display = 'block';
+                phoneModes.style.gridTemplateColumns = '1fr 1fr';
+            }
+        }
+
+        function updateRangeLabels() {
+            let labels;
+            if (category === 1) {
+                labels = [4, 6, 9, 12];
+                termInput.min = 4;
+                termInput.max = 12;
+                if (lastTerm < 4) lastTerm = 4;
+                if (lastTerm > 12) lastTerm = 12;
+            } else {
+                labels = [3, 5, 8, 11, 13];
+                termInput.min = 3;
+                termInput.max = 13;
+            }
+
+            termInput.value = lastTerm;
+            rangeLabels.innerHTML = labels.map(v => `<span data-val="${v}">${v}</span>`).join('');
+            bindRangeLabels();
+            updateSlider();
+        }
+
+        function updateSlider() {
+            const min = +termInput.min;
+            const max = +termInput.max;
+            const val = +termInput.value;
+            const percent = (val - min) / (max - min);
+            termInput.style.background = `linear-gradient(to right, var(--accent) 0%, var(--accent) ${percent * 100}%, var(--border) ${percent * 100}%, var(--border) 100%)`;
+        }
+
+        function calc() {
+            const price = Number(digits(priceInput.value)) || 0;
+            const downRaw = Number(digits(downInput.value)) || 0;
+
+            if (!price) {
+                minDownText.innerText = 'Минимум: 0 ₽';
+                downValue.innerText = '0 ₽';
+                restValue.innerText = '0 ₽';
+                monthlyValue.innerText = '0 ₽';
+                paymentsCount.innerText = '0';
+                totalValue.innerText = '0 ₽';
+                termLabel.innerText = '0 платежей';
+                return;
+            }
+
+            let p, r, term, N, minDown, down, fee = 0;
+
+            if (category === 1) {
+                // Телефоны: N = term - 1
+                term = lastTerm;
+                N = term - 1;
+                if (phoneMode === 'minDown') {
+                    p = phonePrice;
+                    r = phoneRest;
+                } else {
+                    p = phonePriceAlt;
+                    r = phoneRestAlt;
+                }
+                minDown = Math.ceil((price * 0.25) / 100) * 100;
+            } else if (category === 2) {
+                // Другие товары: N = term - 1 (первый платёж - взнос, остальные term-1)
+                term = lastTerm;
+                N = term - 1;
+                if (price >= 150000) {
+                    p = allPrice150t;
+                    r = allRest150t;
+                } else {
+                    p = allPrice;
+                    r = allRest;
+                }
+                fee = price >= 150000 ? 5000 : (price >= 75000 ? 3000 : 2000);
+                minDown = Math.ceil((price * 0.25) / 100) * 100;
+            } else {
+                // Автомобили: N = term
+                term = carTerm;
+                N = term;
+                if (price < 1000000) {
+                    p = carPriceLow;
+                    r = carRestLow;
+                } else {
+                    p = carPriceHigh;
+                    r = carRestHigh;
+                }
+                const totalWithMarkup = price * (p[term] + 1);
+                minDown = Math.ceil((totalWithMarkup * 0.25) / 100) * 100;
+            }
+
+            minDownText.innerText = 'Минимум: ' + bank(minDown);
+
+            if (!userTouchedDown) {
+                down = minDown;
+                downInput.value = bank(minDown);
+                localStorage.setItem('down', minDown);
+            } else {
+                down = downRaw;
+            }
+
+            let totalCost;
+            if (down === minDown) {
+                totalCost = (price + fee) * (p[term] + 1);
+            } else {
+                totalCost = (price + fee - down) * (r[term] + 1) + down;
+            }
+
+            const monthly = Math.ceil(((totalCost - down) / N) / 100) * 100;
+            const total = monthly * N + down;
+
+            lastResult = {
+                price: price,
+                down: down,
+                rest: total - down,
+                monthly: monthly,
+                total: total
+            };
+
+            function paymentWord(n) {
+                n = Math.abs(n) % 100;
+                const n1 = n % 10;
+                if (n > 10 && n < 20) return 'платежей';
+                if (n1 === 1) return 'платёж';
+                if (n1 >= 2 && n1 <= 4) return 'платежа';
+                return 'платежей';
+            }
+
+            termLabel.innerText = term + ' ' + paymentWord(term);
+            downValue.innerText = bank(down);
+            restValue.innerText = bank(total - down);
+            monthlyValue.innerText = bank(monthly);
+            totalValue.innerText = bank(total);
+            paymentsCount.innerText = N;
+        }
+
+        function buildWhatsAppText() {
+            let categoryText;
+            let termValue;
+
+            if (category === 1) {
+                categoryText = 'Телефоны';
+                categoryText += phoneMode === 'minDown' ? ' (Минимальный взнос)' : ' (Минимальная наценка)';
+                termValue = lastTerm;
+            } else if (category === 2) {
+                categoryText = 'Другие товары';
+                termValue = lastTerm;
+            } else {
+                categoryText = 'Автомобили';
+                termValue = carTerm;
+            }
+
+            return `Здравствуйте!
+Интересует рассрочка:
+
+Категория товара: ${categoryText}
+Стоимость товара: ${bank(lastResult.price)}
+Платежей: ${termValue}
+
+Взнос: ${bank(lastResult.down)}
+Остаток: ${bank(lastResult.rest)}
+Ежемесячный платёж: ${bank(lastResult.monthly)}
+Общая сумма: ${bank(lastResult.total)}`.trim();
+        }
+
+        // Init
+        const savedPrice = localStorage.getItem('price');
+        if (savedPrice) {
+            priceInput.value = bank(Number(savedPrice));
+        } else {
+            priceInput.value = bank(75000);
+        }
+
+        document.querySelectorAll('#phoneModes .sub-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.mode === phoneMode) btn.classList.add('active');
+        });
+
+        document.querySelectorAll('#carTerms .term-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (parseInt(btn.dataset.term) === carTerm) btn.classList.add('active');
+        });
+
+        currentCategoryIndex = catToIndex[category] || 2;
+        updateCategoryCarousel(false);
+        updateCategoryIcons();
+        updateUI();
+        updateSlider();
+        calc();
+
+        const savedDown = localStorage.getItem('down');
+        if (savedDown && userTouchedDown) {
+            downInput.value = bank(Number(savedDown));
+        }
+    </script>
+</body>
+</html>
